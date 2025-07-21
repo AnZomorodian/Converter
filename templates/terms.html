@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Fily Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .terms-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+        
+        .terms-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .terms-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .terms-section {
+            margin-bottom: 2rem;
+        }
+        
+        .terms-section h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .terms-section p, .terms-section li {
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 0.8rem;
+        }
+        
+        .terms-section ul {
+            padding-left: 1.5rem;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        
+        .last-updated {
+            font-style: italic;
+            color: #666;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .highlight-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="btn btn-outline-primary back-button">
+        <i class="fas fa-arrow-left me-2"></i>Back to Home
+    </a>
+
+    <div class="container">
+        <div class="terms-container">
+            <div class="terms-header">
+                <h1><i class="fas fa-file-contract me-3"></i>Terms of Service</h1>
+                <p class="mb-0">Please read these terms carefully</p>
+            </div>
+            
+            <div class="last-updated">
+                Last updated: July 21, 2025
+            </div>
+
+            <div class="terms-content">
+                <div class="highlight-box">
+                    <p><strong>Important:</strong> By using Fily Pro, you agree to these Terms of Service. If you do not agree, please do not use our service.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>1. Service Description</h3>
+                    <p>Fily Pro is a web-based file conversion service that allows users to convert various file formats to PDF and other formats. Our service includes:</p>
+                    <ul>
+                        <li>Document to PDF conversion (Word, Excel, PowerPoint)</li>
+                        <li>Image to PDF conversion</li>
+                        <li>Image format conversion (PNG, JPG, WebP, etc.)</li>
+                        <li>PDF merging capabilities</li>
+                        <li>Multiple images to PDF conversion</li>
+                        <li>Text file to PDF conversion</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>2. Acceptable Use</h3>
+                    <p>You agree to use Fily Pro only for lawful purposes. You must not:</p>
+                    <ul>
+                        <li>Upload files containing illegal content, malware, or viruses</li>
+                        <li>Upload copyrighted material without proper authorization</li>
+                        <li>Use the service to harm, threaten, or harass others</li>
+                        <li>Attempt to reverse engineer or compromise our systems</li>
+                        <li>Upload files exceeding our size limits (50MB per file)</li>
+                        <li>Use automated tools to overwhelm our servers</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>3. File Upload and Processing</h3>
+                    <div class="highlight-box">
+                        <p><strong>File Limits:</strong> Maximum file size is 50MB per upload. We support multiple file formats as listed on our main page.</p>
+                    </div>
+                    <p>When you upload files to Fily Pro:</p>
+                    <ul>
+                        <li>You confirm you have the right to upload and convert the files</li>
+                        <li>Files are processed temporarily and deleted within 24 hours</li>
+                        <li>We do not claim ownership of your files</li>
+                        <li>You retain all rights to your original content</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>4. Service Availability</h3>
+                    <p>We strive to provide reliable service, but we cannot guarantee:</p>
+                    <ul>
+                        <li>100% uptime or availability</li>
+                        <li>Conversion success for all file types</li>
+                        <li>Specific conversion speeds or processing times</li>
+                        <li>Compatibility with all file variations</li>
+                    </ul>
+                    <p>We reserve the right to modify, suspend, or discontinue the service at any time.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>5. Intellectual Property</h3>
+                    <p>Regarding intellectual property rights:</p>
+                    <ul>
+                        <li>You retain ownership of your uploaded files and converted documents</li>
+                        <li>Fily Pro and its design are owned by DeepInk Team</li>
+                        <li>You may not copy, modify, or distribute our software or interface</li>
+                        <li>Our service is provided under applicable software licenses</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>6. Privacy and Data Protection</h3>
+                    <p>Your privacy is important to us. Please review our <a href="/privacy">Privacy Policy</a> for details on:</p>
+                    <ul>
+                        <li>How we handle your uploaded files</li>
+                        <li>Data retention and deletion policies</li>
+                        <li>Security measures we implement</li>
+                        <li>Your rights regarding your data</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>7. Disclaimers and Limitations</h3>
+                    <div class="highlight-box">
+                        <p><strong>Important:</strong> Fily Pro is provided "as is" without warranties of any kind.</p>
+                    </div>
+                    <p>We disclaim all warranties, including but not limited to:</p>
+                    <ul>
+                        <li>Accuracy of conversions</li>
+                        <li>Fitness for a particular purpose</li>
+                        <li>Non-infringement of third-party rights</li>
+                        <li>Uninterrupted or error-free operation</li>
+                    </ul>
+                    <p>Our liability is limited to the maximum extent permitted by law.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h3>8. User Responsibilities</h3>
+                    <p>As a user of Fily Pro, you are responsible for:</p>
+                    <ul>
+                        <li>Ensuring you have rights to upload and convert files</li>
+                        <li>Verifying the accuracy of converted documents</li>
+                        <li>Backing up important files before conversion</li>
+                        <li>Using the service in compliance with applicable laws</li>
+                        <li>Reporting any security vulnerabilities or issues</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>9. Termination</h3>
+                    <p>Either party may terminate use of the service at any time:</p>
+                    <ul>
+                        <li>You may stop using Fily Pro at any time</li>
+                        <li>We may suspend access for violations of these terms</li>
+                        <li>We may discontinue the service with reasonable notice</li>
+                        <li>Upon termination, your access rights cease immediately</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>10. Contact and Support</h3>
+                    <p>For questions, support, or to report issues:</p>
+                    <ul>
+                        <li><strong>GitHub:</strong> <a href="https://github.com/AnZomorodian" target="_blank">DeepInk Team Repository</a></li>
+                        <li><strong>Telegram:</strong> <a href="https://t.me/DeepInkTeam" target="_blank">@DeepInkTeam</a></li>
+                        <li><strong>Discord:</strong> <a href="https://discord.gg/deepink" target="_blank">DeepInk Community</a></li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>11. Changes to Terms</h3>
+                    <p>We may update these Terms of Service periodically. When we do:</p>
+                    <ul>
+                        <li>We will update the "Last updated" date</li>
+                        <li>Significant changes will be highlighted on our website</li>
+                        <li>Continued use of the service constitutes acceptance of new terms</li>
+                        <li>You should review these terms regularly</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h3>12. Governing Law</h3>
+                    <p>These Terms of Service are governed by and construed in accordance with applicable laws. Any disputes will be resolved through appropriate legal channels.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

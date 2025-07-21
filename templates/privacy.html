@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Fily Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .policy-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+        
+        .policy-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .policy-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .policy-section {
+            margin-bottom: 2rem;
+        }
+        
+        .policy-section h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .policy-section p, .policy-section li {
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 0.8rem;
+        }
+        
+        .policy-section ul {
+            padding-left: 1.5rem;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        
+        .last-updated {
+            font-style: italic;
+            color: #666;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="btn btn-outline-primary back-button">
+        <i class="fas fa-arrow-left me-2"></i>Back to Home
+    </a>
+
+    <div class="container">
+        <div class="policy-container">
+            <div class="policy-header">
+                <h1><i class="fas fa-shield-alt me-3"></i>Privacy Policy</h1>
+                <p class="mb-0">Your privacy is important to us</p>
+            </div>
+            
+            <div class="last-updated">
+                Last updated: July 21, 2025
+            </div>
+
+            <div class="policy-content">
+                <div class="policy-section">
+                    <h3>1. Information We Collect</h3>
+                    <p>Fily Pro is designed with privacy in mind. We collect minimal information necessary to provide our file conversion services:</p>
+                    <ul>
+                        <li><strong>File Data:</strong> We temporarily process your uploaded files solely for conversion purposes</li>
+                        <li><strong>Usage Statistics:</strong> Basic anonymous usage statistics to improve our service</li>
+                        <li><strong>Technical Data:</strong> Browser type, IP address, and access times for security and performance</li>
+                    </ul>
+                </div>
+
+                <div class="policy-section">
+                    <h3>2. How We Use Your Information</h3>
+                    <p>Your information is used exclusively for:</p>
+                    <ul>
+                        <li>Converting your files to the requested format</li>
+                        <li>Providing download links for converted files</li>
+                        <li>Improving our service quality and performance</li>
+                        <li>Ensuring security and preventing abuse</li>
+                    </ul>
+                </div>
+
+                <div class="policy-section">
+                    <h3>3. File Storage and Retention</h3>
+                    <p>We maintain strict data retention policies:</p>
+                    <ul>
+                        <li><strong>Temporary Storage:</strong> Uploaded files are stored temporarily only during the conversion process</li>
+                        <li><strong>Automatic Deletion:</strong> All files are automatically deleted from our servers within 24 hours</li>
+                        <li><strong>No Long-term Storage:</strong> We do not permanently store your files or personal documents</li>
+                        <li><strong>Secure Processing:</strong> All file processing occurs in a secure, isolated environment</li>
+                    </ul>
+                </div>
+
+                <div class="policy-section">
+                    <h3>4. Data Security</h3>
+                    <p>We implement industry-standard security measures:</p>
+                    <ul>
+                        <li>Encrypted data transmission using HTTPS/SSL</li>
+                        <li>Secure file processing in isolated environments</li>
+                        <li>Regular security audits and updates</li>
+                        <li>Access controls and monitoring systems</li>
+                    </ul>
+                </div>
+
+                <div class="policy-section">
+                    <h3>5. Third-Party Services</h3>
+                    <p>Fily Pro operates independently and does not share your files with third-party services. We may use:</p>
+                    <ul>
+                        <li>Content Delivery Networks (CDNs) for faster loading</li>
+                        <li>Analytics services for anonymous usage statistics</li>
+                        <li>Security services for protection against threats</li>
+                    </ul>
+                    <p>None of these services have access to your uploaded files.</p>
+                </div>
+
+                <div class="policy-section">
+                    <h3>6. Your Rights</h3>
+                    <p>You have the right to:</p>
+                    <ul>
+                        <li>Request information about data processing</li>
+                        <li>Request deletion of your data (though files are auto-deleted)</li>
+                        <li>Opt-out of analytics tracking</li>
+                        <li>Contact us with privacy concerns</li>
+                    </ul>
+                </div>
+
+                <div class="policy-section">
+                    <h3>7. Cookies and Tracking</h3>
+                    <p>We use minimal cookies for:</p>
+                    <ul>
+                        <li>Session management during file conversion</li>
+                        <li>Basic analytics (anonymous)</li>
+                        <li>Security and fraud prevention</li>
+                    </ul>
+                    <p>No personal information is stored in cookies.</p>
+                </div>
+
+                <div class="policy-section">
+                    <h3>8. Contact Information</h3>
+                    <p>If you have questions about this Privacy Policy or our data practices, please contact us:</p>
+                    <ul>
+                        <li><strong>Email:</strong> privacy@filypro.com</li>
+                        <li><strong>Telegram:</strong> <a href="https://t.me/DeepInkTeam" target="_blank">@DeepInkTeam</a></li>
+                        <li><strong>GitHub:</strong> <a href="https://github.com/AnZomorodian" target="_blank">DeepInk Team</a></li>
+                    </ul>
+                </div>
+
+                <div class="policy-section">
+                    <h3>9. Changes to This Policy</h3>
+                    <p>We may update this Privacy Policy from time to time. We will notify users of any material changes by:</p>
+                    <ul>
+                        <li>Updating the "Last updated" date at the top of this policy</li>
+                        <li>Displaying a notice on our website</li>
+                        <li>Sending notifications for significant changes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

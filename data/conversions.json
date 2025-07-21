@@ -10,5 +10,29 @@
     "converted_path": "converted/da03bd31-9c53-4c59-a159-edfc98076eb5_converted.pdf",
     "created_at": "2025-07-21T11:50:33.471448",
     "id": 1
+  },
+  {
+    "file_id": "79a72beb-6e92-4a9a-9402-24f9f4074e7c",
+    "original_filename": "pawn.png",
+    "file_extension": "png",
+    "file_size": 16160,
+    "conversion_type": "image-to-pdf",
+    "quality_setting": "high",
+    "status": "completed",
+    "converted_path": "converted/79a72beb-6e92-4a9a-9402-24f9f4074e7c_converted.pdf",
+    "created_at": "2025-07-21T12:24:27.945750",
+    "id": 2
+  },
+  {
+    "file_id": "b47da527-e069-4e15-b6f8-163cd25d88ec",
+    "original_filename": "upscalemedia-transformed.png",
+    "file_extension": "png",
+    "file_size": 5973911,
+    "conversion_type": "image-to-pdf",
+    "quality_setting": "high",
+    "status": "completed",
+    "converted_path": "converted/b47da527-e069-4e15-b6f8-163cd25d88ec_converted.pdf",
+    "created_at": "2025-07-21T12:24:28.294544",
+    "id": 3
   }
 ]

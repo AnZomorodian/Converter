@@ -87,13 +87,23 @@ class FilyPro {
         document.getElementById('mergeInstructions').style.display = 'none';
         document.getElementById('imagesToPdfInstructions').style.display = 'none';
 
-        // Show specific options based on type
+        // Set file input accept attribute based on conversion type
+        const fileInput = document.getElementById('fileInput');
         if (this.selectedType === 'image-converter') {
             document.getElementById('imageFormatOptions').style.display = 'block';
+            fileInput.accept = '.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp';
         } else if (this.selectedType === 'merge-pdf') {
             document.getElementById('mergeInstructions').style.display = 'block';
+            fileInput.accept = '.pdf';
         } else if (this.selectedType === 'images-to-pdf') {
             document.getElementById('imagesToPdfInstructions').style.display = 'block';
+            fileInput.accept = '.png,.jpg,.jpeg,.gif,.bmp,.tiff';
+        } else if (this.selectedType === 'document-to-pdf') {
+            fileInput.accept = '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp';
+        } else if (this.selectedType === 'text-to-pdf') {
+            fileInput.accept = '.txt,.rtf,.md,.html,.csv';
+        } else {
+            fileInput.accept = '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp,.csv,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.pdf,.md,.html';
         }
     }
 
@@ -368,7 +378,7 @@ class FilyPro {
                                 <i class="fas fa-download"></i>
                             </a>
                         ` : ''}
-                        <button class="btn btn-sm btn-outline-danger" onclick="FilyProInstance.deleteConversion('${conv.file_id}')">
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.filyPro.deleteConversion('${conv.file_id}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -404,8 +414,5 @@ class FilyPro {
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.FilyProInstance = new FilyPro();
+    window.filyPro = new FilyPro();
 });
-
-// Expose the class globally for onclick handlers
-window.FilyPro = FilyPro;

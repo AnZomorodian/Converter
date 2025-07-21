@@ -9,12 +9,22 @@ from app import app
 from converter import convert_to_pdf, convert_image_format, merge_pdfs, convert_multiple_images_to_pdf
 from storage import storage
 
+@app.route('/privacy')
+def privacy():
+    """Privacy Policy page"""
+    return render_template('privacy.html')
+
+@app.route('/terms')
+def terms():
+    """Terms of Service page"""
+    return render_template('terms.html')
+
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {
     'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
     'txt', 'rtf', 'odt', 'ods', 'odp', 'csv',
     'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff',
-    'md', 'html'
+    'md', 'html', 'pdf'
 }
 
 def allowed_file(filename):

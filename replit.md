@@ -153,6 +153,15 @@ The application is configured for flexible deployment:
 ✓ **Better Grid Layout**: Expanded conversion type grid to handle 6 options with 300px minimum width
 ✓ **Smart File Handling**: Skip individual processing for batch types, handle at the end
 
+## Latest Fixes (July 21, 2025 - Evening)
+### 🔧 Bug Fixes and Improvements
+✓ **Fixed Delete Functionality**: Recent conversions delete buttons now work properly with correct JavaScript references
+✓ **Fixed File Type Restrictions**: File input now shows appropriate file types based on selected conversion type
+✓ **Removed Heart Icon**: Cleaned up footer text to remove heart emoji between "Made with" and "by DeepInk Team"
+✓ **Added Legal Pages**: Created comprehensive Privacy Policy and Terms of Service pages with professional styling
+✓ **Enhanced File Type Support**: Added PDF support to allowed extensions for merge operations
+✓ **Improved User Experience**: File dialogs now filter to show only relevant file types for each conversion mode
+
 ## Major Update (July 21, 2025) - GitHub-Ready Release
 
 ### 🚀 Major Features Added
