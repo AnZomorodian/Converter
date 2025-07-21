@@ -160,7 +160,7 @@ The application is configured for flexible deployment:
 ✓ **Advanced Format Handling**: Improved color mode conversion for different target formats with proper fallbacks
 ✓ **Enhanced README**: Created comprehensive GitHub-ready documentation with badges, installation guides, and feature highlights
 ✓ **About Us Page**: Built amazing About Us page showcasing DeepInk Team with professional design and team profiles
-✓ **Replit-Style Design**: Added black and minimal design theme inspired by Replit with smooth scrolling and clean aesthetics
+✓ **Restored Original Design**: Reverted to original purple/blue gradient theme as requested
 ✓ **Enhanced Footer**: Added About Us link and improved social media integration
 ✓ **Better Error Handling**: Fixed PIL Image errors and improved format compatibility
 ✓ **Quality Settings**: Enhanced image quality controls for different output formats
