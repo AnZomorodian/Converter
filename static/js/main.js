@@ -70,12 +70,31 @@ class FilyPro {
         option.classList.add('selected');
         this.selectedType = option.dataset.type;
 
+        // Show appropriate options based on conversion type
+        this.showConversionTypeOptions();
+
         // Show upload card after a short delay
         setTimeout(() => {
             this.conversionTypeCard.style.display = 'none';
             this.uploadCard.style.display = 'block';
             this.uploadCard.scrollIntoView({ behavior: 'smooth' });
         }, 300);
+    }
+
+    showConversionTypeOptions() {
+        // Hide all specific options first
+        document.getElementById('imageFormatOptions').style.display = 'none';
+        document.getElementById('mergeInstructions').style.display = 'none';
+        document.getElementById('imagesToPdfInstructions').style.display = 'none';
+
+        // Show specific options based on type
+        if (this.selectedType === 'image-converter') {
+            document.getElementById('imageFormatOptions').style.display = 'block';
+        } else if (this.selectedType === 'merge-pdf') {
+            document.getElementById('mergeInstructions').style.display = 'block';
+        } else if (this.selectedType === 'images-to-pdf') {
+            document.getElementById('imagesToPdfInstructions').style.display = 'block';
+        }
     }
 
     goBack() {

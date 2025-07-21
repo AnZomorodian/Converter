@@ -125,8 +125,8 @@
                                         <div class="option-icon">
                                             <i class="fas fa-image"></i>
                                         </div>
-                                        <h6>Images to PDF</h6>
-                                        <p>Convert image files to PDF format</p>
+                                        <h6>Image to PDF</h6>
+                                        <p>Convert single image files to PDF format</p>
                                         <div class="formats-preview">PNG, JPG, JPEG, GIF, BMP, TIFF</div>
                                     </div>
                                     
@@ -139,13 +139,31 @@
                                         <div class="formats-preview">TXT, RTF, MD, HTML</div>
                                     </div>
                                     
-                                    <div class="conversion-option" data-type="other-formats">
+                                    <div class="conversion-option" data-type="image-converter">
                                         <div class="option-icon">
-                                            <i class="fas fa-plus-circle"></i>
+                                            <i class="fas fa-exchange-alt"></i>
                                         </div>
-                                        <h6>Other Formats</h6>
-                                        <p>Convert other file types to PDF</p>
-                                        <div class="formats-preview">ODT, ODS, ODP, CSV</div>
+                                        <h6>Image Format Converter</h6>
+                                        <p>Convert between image formats like PNG to JPG</p>
+                                        <div class="formats-preview">PNG ↔ JPG, WEBP, BMP, TIFF</div>
+                                    </div>
+                                    
+                                    <div class="conversion-option" data-type="merge-pdf">
+                                        <div class="option-icon">
+                                            <i class="fas fa-layer-group"></i>
+                                        </div>
+                                        <h6>Merge PDF Files</h6>
+                                        <p>Combine multiple PDF files into one</p>
+                                        <div class="formats-preview">Multiple PDF → Single PDF</div>
+                                    </div>
+                                    
+                                    <div class="conversion-option" data-type="images-to-pdf">
+                                        <div class="option-icon">
+                                            <i class="fas fa-images"></i>
+                                        </div>
+                                        <h6>Images to PDF</h6>
+                                        <p>Add multiple images into a single PDF</p>
+                                        <div class="formats-preview">Multiple Images → PDF</div>
                                     </div>
                                 </div>
                             </div>
@@ -170,7 +188,7 @@
                                         <span class="info-item"><i class="fas fa-weight-hanging"></i> Max 50MB per file</span>
                                         <span class="info-item"><i class="fas fa-files"></i> Multiple files supported</span>
                                     </div>
-                                    <input type="file" id="fileInput" multiple accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp,.csv,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.md,.html">
+                                    <input type="file" id="fileInput" multiple accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp,.csv,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.pdf,.md,.html">
                                 </div>
                                 
                                 <!-- Conversion Options -->
@@ -189,6 +207,32 @@
                                             <label for="customName" class="form-label">Custom Output Name (Optional)</label>
                                             <input type="text" class="form-control" id="customName" placeholder="Enter custom filename">
                                         </div>
+                                    </div>
+                                    
+                                    <!-- Image Format Conversion Options -->
+                                    <div class="row mt-3" id="imageFormatOptions" style="display: none;">
+                                        <div class="col-md-6">
+                                            <label for="targetFormat" class="form-label">Target Format</label>
+                                            <select class="form-select" id="targetFormat">
+                                                <option value="jpg">JPG</option>
+                                                <option value="png">PNG</option>
+                                                <option value="webp">WebP</option>
+                                                <option value="bmp">BMP</option>
+                                                <option value="tiff">TIFF</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- PDF Merge Instructions -->
+                                    <div class="alert alert-info mt-3" id="mergeInstructions" style="display: none;">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Upload multiple PDF files to merge them into one document.
+                                    </div>
+                                    
+                                    <!-- Images to PDF Instructions -->
+                                    <div class="alert alert-info mt-3" id="imagesToPdfInstructions" style="display: none;">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Upload multiple images to combine them into a single PDF document.
                                     </div>
                                 </div>
                                 

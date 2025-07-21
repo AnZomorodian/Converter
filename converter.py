@@ -504,3 +504,135 @@ def add_password_to_pdf(pdf_path, password):
     except Exception as e:
         logging.error(f"Password protection error: {str(e)}")
         return True  # Return True to not fail the conversion
+
+def convert_image_format(input_path, output_path, target_format='jpg', quality=95):
+    """
+    Convert between different image formats
+    """
+    try:
+        from PIL import Image
+        
+        # Open the image
+        with Image.open(input_path) as img:
+            # Convert RGBA to RGB if necessary for JPEG
+            if target_format.lower() in ['jpg', 'jpeg'] and img.mode in ['RGBA', 'LA']:
+                # Create a white background
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                img = background
+            
+            # Save in target format
+            if target_format.lower() in ['jpg', 'jpeg']:
+                img.save(output_path, 'JPEG', quality=quality, optimize=True)
+            elif target_format.lower() == 'png':
+                img.save(output_path, 'PNG', optimize=True)
+            elif target_format.lower() == 'webp':
+                img.save(output_path, 'WEBP', quality=quality, optimize=True)
+            elif target_format.lower() == 'bmp':
+                img.save(output_path, 'BMP')
+            elif target_format.lower() == 'tiff':
+                img.save(output_path, 'TIFF', quality=quality)
+            else:
+                logging.error(f"Unsupported target format: {target_format}")
+                return False
+            
+        logging.info(f"Successfully converted image to {target_format.upper()}")
+        return True
+        
+    except Exception as e:
+        logging.error(f"Image format conversion error: {str(e)}")
+        return False
+
+def merge_pdfs(input_paths, output_path):
+    """
+    Merge multiple PDF files into one
+    """
+    try:
+        from PyPDF2 import PdfMerger
+        
+        merger = PdfMerger()
+        
+        for path in input_paths:
+            if os.path.exists(path):
+                merger.append(path)
+            else:
+                logging.warning(f"PDF file not found: {path}")
+        
+        with open(output_path, 'wb') as output_file:
+            merger.write(output_file)
+        
+        merger.close()
+        logging.info(f"Successfully merged {len(input_paths)} PDFs")
+        return True
+        
+    except Exception as e:
+        logging.error(f"PDF merge error: {str(e)}")
+        return False
+
+def convert_multiple_images_to_pdf(input_paths, output_path, quality='high'):
+    """
+    Convert multiple images into a single PDF
+    """
+    try:
+        from PIL import Image
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.pagesizes import letter, A4
+        
+        # Choose page size based on quality
+        if quality == 'high':
+            page_size = A4
+        else:
+            page_size = letter
+        
+        c = canvas.Canvas(output_path, pagesize=page_size)
+        page_width, page_height = page_size
+        
+        for img_path in input_paths:
+            if not os.path.exists(img_path):
+                logging.warning(f"Image file not found: {img_path}")
+                continue
+                
+            try:
+                # Open and process image
+                with Image.open(img_path) as img:
+                    # Convert to RGB if necessary
+                    if img.mode in ['RGBA', 'LA']:
+                        background = Image.new('RGB', img.size, (255, 255, 255))
+                        background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                        img = background
+                    
+                    # Calculate scaling to fit page
+                    img_width, img_height = img.size
+                    scale_x = (page_width - 40) / img_width  # 20pt margin on each side
+                    scale_y = (page_height - 40) / img_height  # 20pt margin on each side
+                    scale = min(scale_x, scale_y)
+                    
+                    # Calculate centered position
+                    new_width = img_width * scale
+                    new_height = img_height * scale
+                    x = (page_width - new_width) / 2
+                    y = (page_height - new_height) / 2
+                    
+                    # Save temporary file for reportlab
+                    temp_img_path = f"{img_path}_temp.jpg"
+                    img.save(temp_img_path, 'JPEG', quality=85)
+                    
+                    # Add image to PDF
+                    c.drawImage(temp_img_path, x, y, width=new_width, height=new_height)
+                    c.showPage()
+                    
+                    # Clean up temp file
+                    if os.path.exists(temp_img_path):
+                        os.remove(temp_img_path)
+                        
+            except Exception as e:
+                logging.error(f"Error processing image {img_path}: {str(e)}")
+                continue
+        
+        c.save()
+        logging.info(f"Successfully converted {len(input_paths)} images to PDF")
+        return True
+        
+    except Exception as e:
+        logging.error(f"Multiple images to PDF conversion error: {str(e)}")
+        return False

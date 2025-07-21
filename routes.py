@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash, jsonify, send_file, session
 from werkzeug.utils import secure_filename
 from app import app
-from converter import convert_to_pdf
+from converter import convert_to_pdf, convert_image_format, merge_pdfs, convert_multiple_images_to_pdf
 from storage import storage
 
 # Allowed file extensions
@@ -43,6 +43,7 @@ def upload_files():
         return jsonify({'success': False, 'error': 'No files selected'})
     
     results = []
+    uploaded_files = []  # Keep track of uploaded files for batch processing
     
     for file in files:
         if file and allowed_file(file.filename):
@@ -55,13 +56,36 @@ def upload_files():
                 # Save original file
                 original_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{file_id}_{filename}")
                 file.save(original_path)
+                uploaded_files.append({
+                    'path': original_path,
+                    'id': file_id,
+                    'name': filename,
+                    'extension': file_extension
+                })
                 
-                # Convert file to PDF
-                output_filename = custom_name if custom_name else f"{file_id}_converted.pdf"
-                converted_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
-                success = convert_to_pdf(original_path, converted_path, filename, quality=quality)
+                # Handle different conversion types
+                if conversion_type == 'image-converter':
+                    # Image format conversion
+                    target_format = request.form.get('target_format', 'jpg')
+                    output_filename = custom_name if custom_name else f"{file_id}_converted.{target_format}"
+                    converted_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
+                    success = convert_image_format(original_path, converted_path, target_format, quality=95)
+                elif conversion_type == 'merge-pdf':
+                    # PDF merging - skip individual processing
+                    continue
+                elif conversion_type == 'images-to-pdf':
+                    # Images to PDF - skip individual processing
+                    continue
+                else:
+                    # Regular PDF conversion
+                    output_filename = custom_name if custom_name else f"{file_id}_converted.pdf"
+                    converted_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
+                    success = convert_to_pdf(original_path, converted_path, filename, quality=quality)
                 
-                if success and os.path.exists(converted_path):
+                if conversion_type in ['merge-pdf', 'images-to-pdf']:
+                    # Skip individual file processing for batch types
+                    continue
+                elif success and os.path.exists(converted_path):
                     # Store conversion record
                     conversion_data = {
                         'file_id': file_id,
@@ -118,6 +142,69 @@ def upload_files():
                 'success': False,
                 'filename': file.filename,
                 'error': 'File type not supported'
+            })
+    
+    # Handle batch processing for special conversion types
+    if conversion_type == 'merge-pdf' and uploaded_files:
+        # Merge PDFs
+        pdf_files = [f for f in uploaded_files if f['extension'] == 'pdf']
+        if len(pdf_files) > 1:
+            batch_id = str(uuid.uuid4())
+            output_filename = custom_name if custom_name else f"{batch_id}_merged.pdf"
+            merged_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
+            
+            pdf_paths = [f['path'] for f in pdf_files]
+            success = merge_pdfs(pdf_paths, merged_path)
+            
+            if success:
+                results.append({
+                    'success': True,
+                    'filename': 'Merged PDF',
+                    'download_url': url_for('download_file', file_id=batch_id),
+                    'file_id': batch_id
+                })
+            else:
+                results.append({
+                    'success': False,
+                    'filename': 'PDF Merge',
+                    'error': 'Failed to merge PDF files'
+                })
+        else:
+            results.append({
+                'success': False,
+                'filename': 'PDF Merge',
+                'error': 'Need at least 2 PDF files to merge'
+            })
+            
+    elif conversion_type == 'images-to-pdf' and uploaded_files:
+        # Convert multiple images to PDF
+        image_files = [f for f in uploaded_files if f['extension'] in ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff']]
+        if len(image_files) > 0:
+            batch_id = str(uuid.uuid4())
+            output_filename = custom_name if custom_name else f"{batch_id}_images.pdf"
+            images_pdf_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
+            
+            image_paths = [f['path'] for f in image_files]
+            success = convert_multiple_images_to_pdf(image_paths, images_pdf_path, quality)
+            
+            if success:
+                results.append({
+                    'success': True,
+                    'filename': f'Images to PDF ({len(image_files)} images)',
+                    'download_url': url_for('download_file', file_id=batch_id),
+                    'file_id': batch_id
+                })
+            else:
+                results.append({
+                    'success': False,
+                    'filename': 'Images to PDF',
+                    'error': 'Failed to convert images to PDF'
+                })
+        else:
+            results.append({
+                'success': False,
+                'filename': 'Images to PDF',
+                'error': 'No valid image files found'
             })
     
     return jsonify({'results': results})

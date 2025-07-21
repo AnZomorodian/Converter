@@ -103,7 +103,7 @@ The application is configured for flexible deployment:
 ✓ **Improved responsive design** - Better mobile compatibility and layout
 ✓ **Maintained all core functionality** - File conversion, drag-and-drop, progress tracking
 
-## Recent Changes (July 2025)
+## Latest Update (July 21, 2025 - Evening)
 
 ✓ Fixed file upload bug with missing extensions that caused "list index out of range" error
 ✓ Added batch file upload and conversion capability
@@ -139,6 +139,19 @@ The application is configured for flexible deployment:
 ✓ Fixed LibreOffice integration - all conversions now working properly
 ✓ Successfully tested Word to PDF conversion with real files
 ✓ Added system dependency installation for LibreOffice
+
+## Latest Update (July 21, 2025 - Evening)
+### 🔥 Major Feature Addition: Advanced Conversion Types
+✓ **Added 3 new conversion types**: Image Format Converter, PDF Merge, and Images to PDF
+✓ **Enhanced Conversion Options**: Added 6 conversion types total with specialized UI for each
+✓ **Image Format Conversion**: Convert between PNG, JPG, WebP, BMP, TIFF with quality settings
+✓ **PDF Merging**: Batch process to combine multiple PDF files into one document
+✓ **Images to PDF**: Convert multiple images into a single PDF with proper scaling and centering
+✓ **Advanced Batch Processing**: Smart handling for different conversion types with appropriate file grouping
+✓ **Enhanced UI**: Type-specific options and instructions shown based on selected conversion type
+✓ **Improved Converter Functions**: Added convert_image_format(), merge_pdfs(), convert_multiple_images_to_pdf()
+✓ **Better Grid Layout**: Expanded conversion type grid to handle 6 options with 300px minimum width
+✓ **Smart File Handling**: Skip individual processing for batch types, handle at the end
 
 ## Major Update (July 21, 2025) - GitHub-Ready Release
 
