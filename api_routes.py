@@ -1,4 +1,4 @@
-from flask import jsonify, request, Response
+from flask import jsonify, request, Response, render_template
 from app import app, db
 from models import ConversionHistory, SystemStats, FileMetadata
 from utils import cleanup_old_files, format_file_size
