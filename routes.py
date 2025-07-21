@@ -1,11 +1,21 @@
 import os
 import uuid
-from flask import render_template, request, jsonify, send_file, current_app
+from datetime import datetime
+from flask import render_template, request, jsonify, send_file, current_app, Response, stream_template
 from werkzeug.utils import secure_filename
-from app import app
+from app import app, db
 from converter import convert_to_pdf
+from models import ConversionHistory, SystemStats, FileMetadata
+from utils import (
+    calculate_file_hash, get_file_mime_type, get_image_dimensions,
+    count_document_pages, count_words_in_text, validate_file_security,
+    format_file_size, cleanup_old_files, set_conversion_progress,
+    get_conversion_progress
+)
 from pathlib import Path
 import logging
+import json
+import time
 
 ALLOWED_EXTENSIONS = {
     'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 
