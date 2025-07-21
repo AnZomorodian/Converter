@@ -18,28 +18,7 @@
                     <span class="brand-subtitle">Pro</span>
                 </div>
             </a>
-            <div class="navbar-nav ms-auto">
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-cog me-1"></i> Convert
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="showConversionMode('pdf-to-word')">
-                            <i class="fas fa-file-word me-2"></i>PDF to Word
-                        </a></li>
-                        <li><a class="dropdown-item" href="#" onclick="showConversionMode('pdf-password')">
-                            <i class="fas fa-lock me-2"></i>Add Password to PDF
-                        </a></li>
-                        <li><a class="dropdown-item" href="#" onclick="showConversionMode('pdf-merge')">
-                            <i class="fas fa-object-group me-2"></i>Merge PDFs
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="showConversionMode('any-to-pdf')">
-                            <i class="fas fa-magic me-2"></i>Any to PDF
-                        </a></li>
-                    </ul>
-                </div>
-            </div>
+
         </div>
     </nav>
 
@@ -71,6 +50,43 @@
                     </div>
                 </div>
 
+                <!-- Supported Formats Section -->
+                <div class="card mb-4" id="supportedFormatsSection">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-4">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Supported File Formats
+                        </h5>
+                        <div class="supported-formats">
+                            <span class="format-badge">DOC</span>
+                            <span class="format-badge">DOCX</span>
+                            <span class="format-badge">XLS</span>
+                            <span class="format-badge">XLSX</span>
+                            <span class="format-badge">PPT</span>
+                            <span class="format-badge">PPTX</span>
+                            <span class="format-badge">PDF</span>
+                            <span class="format-badge">TXT</span>
+                            <span class="format-badge">RTF</span>
+                            <span class="format-badge">ODT</span>
+                            <span class="format-badge">ODS</span>
+                            <span class="format-badge">ODP</span>
+                            <span class="format-badge">HTML</span>
+                            <span class="format-badge">XML</span>
+                            <span class="format-badge">JSON</span>
+                            <span class="format-badge">MD</span>
+                            <span class="format-badge">CSV</span>
+                            <span class="format-badge">PNG</span>
+                            <span class="format-badge">JPG</span>
+                            <span class="format-badge">GIF</span>
+                            <span class="format-badge">BMP</span>
+                            <span class="format-badge">TIFF</span>
+                            <span class="format-badge">PY</span>
+                            <span class="format-badge">JS</span>
+                            <span class="format-badge">CSS</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Conversion Type Selection -->
                 <div class="card mb-4" id="conversionTypeSelector">
                     <div class="card-body">
@@ -78,6 +94,14 @@
                             <i class="fas fa-cog me-2"></i>
                             Choose Conversion Type
                         </h5>
+                        
+                        <!-- Back Button (initially hidden) -->
+                        <div class="text-center mb-3" id="backButtonContainer" style="display: none;">
+                            <button class="btn btn-outline-primary" onclick="goBackToSelection()">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Conversion Types
+                            </button>
+                        </div>
                         <div class="row">
                             <div class="col-md-3 col-sm-6 mb-3">
                                 <div class="conversion-option" onclick="selectConversionType('any-to-pdf')">

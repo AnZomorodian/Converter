@@ -55,6 +55,8 @@ class PDFConverter {
     showUploadArea() {
         this.uploadArea.classList.remove('initial-hidden', 'd-none');
         document.getElementById('conversionTypeSelector').style.display = 'none';
+        document.getElementById('supportedFormatsSection').style.display = 'none';
+        document.getElementById('backButtonContainer').style.display = 'block';
     }
     
     attachEventListeners() {
@@ -325,6 +327,8 @@ class PDFConverter {
         // Reset to conversion type selection
         this.uploadArea.classList.add('initial-hidden');
         document.getElementById('conversionTypeSelector').style.display = 'block';
+        document.getElementById('supportedFormatsSection').style.display = 'block';
+        document.getElementById('backButtonContainer').style.display = 'none';
         
         // Reset selection
         document.querySelectorAll('.conversion-option').forEach(option => {
@@ -418,6 +422,10 @@ function selectConversionType(type) {
 
 function showConversionMode(mode) {
     selectConversionType(mode);
+}
+
+function goBackToSelection() {
+    window.converter.resetInterface();
 }
 
 // Initialize when DOM is loaded

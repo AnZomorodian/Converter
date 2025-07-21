@@ -115,4 +115,10 @@ The application is configured for flexible deployment:
 ✓ Added visual conversion type selector with 4 main options
 ✓ Improved user flow: Choose conversion type → Upload files → Configure → Convert
 ✓ Enhanced file finding algorithm for downloads to prevent "File not found" errors
+✓ Removed conversion dropdown from header for cleaner navigation
+✓ Added back button to return to conversion type selection
+✓ Moved supported formats section above conversion type chooser
+✓ Enhanced CSS animations and visual effects for better user experience
+✓ Fixed Word to PDF conversion error with better file handling
+✓ Added smooth transitions and hover effects throughout the interface
 ✓ Added system dependency installation for LibreOffice
