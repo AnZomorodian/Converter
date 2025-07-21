@@ -81,7 +81,24 @@ The application is configured for flexible deployment:
 ## Technical Notes
 
 - **File Size Limit**: 50MB maximum per upload
-- **Supported Formats**: DOC/DOCX, XLS/XLSX, PPT/PPTX, common image formats, TXT
+- **Supported Formats**: DOC/DOCX, XLS/XLSX, PPT/PPTX, common image formats, TXT, CSV, PDF, RTF, ODT, ODS, ODP
 - **Conversion Timeout**: 60-second timeout for LibreOffice operations
 - **Error Handling**: Comprehensive logging for debugging conversion issues
 - **File Naming**: UUID-based system prevents filename conflicts
+- **Batch Processing**: Support for multiple file uploads and conversions
+- **Quality Options**: High, medium, and low quality conversion settings
+- **Password Protection**: Basic framework (implementation pending)
+- **File Preview**: Text and image preview capabilities
+- **Conversion History**: Track and display recent conversions
+
+## Recent Changes (July 2025)
+
+✓ Fixed file upload bug with missing extensions that caused "list index out of range" error
+✓ Added batch file upload and conversion capability
+✓ Enhanced supported file formats (CSV, PDF, RTF, ODT, ODS, ODP)
+✓ Implemented conversion options (quality settings, password protection framework)
+✓ Added file preview functionality for images and text files
+✓ Created conversion history tracking and display
+✓ Improved error handling and validation
+✓ Enhanced UI with options area and better progress tracking
+✓ Added system dependency installation for LibreOffice

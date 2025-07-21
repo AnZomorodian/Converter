@@ -2,19 +2,34 @@ class PDFConverter {
     constructor() {
         this.uploadArea = document.getElementById('uploadArea');
         this.progressArea = document.getElementById('progressArea');
+        this.optionsArea = document.getElementById('optionsArea');
         this.successArea = document.getElementById('successArea');
         this.fileInput = document.getElementById('fileInput');
+        this.batchFileInput = document.getElementById('batchFileInput');
         this.progressBar = document.getElementById('progressBar');
         this.progressText = document.getElementById('progressText');
         this.fileName = document.getElementById('fileName');
         this.downloadBtn = document.getElementById('downloadBtn');
         this.convertAnotherBtn = document.getElementById('convertAnotherBtn');
+        this.startConversionBtn = document.getElementById('startConversionBtn');
+        this.qualitySelect = document.getElementById('qualitySelect');
+        this.passwordInput = document.getElementById('passwordInput');
         this.uploadCard = document.getElementById('uploadCard');
+        this.refreshHistoryBtn = document.getElementById('refreshHistoryBtn');
+        this.historyList = document.getElementById('historyList');
+        this.previewContainer = document.getElementById('previewContainer');
+        this.previewContent = document.getElementById('previewContent');
         
         this.currentFileId = null;
         this.currentFileName = null;
+        this.batchFiles = [];
         
         this.initializeEventListeners();
+        
+        // Load conversion history after a short delay to ensure all elements are ready
+        setTimeout(() => {
+            this.loadConversionHistory();
+        }, 100);
     }
     
     initializeEventListeners() {
@@ -22,6 +37,13 @@ class PDFConverter {
         this.fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 this.handleFile(e.target.files[0]);
+            }
+        });
+        
+        // Batch file input change
+        this.batchFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                this.handleBatchFiles(Array.from(e.target.files));
             }
         });
         
@@ -59,6 +81,16 @@ class PDFConverter {
         this.convertAnotherBtn.addEventListener('click', () => {
             this.resetInterface();
         });
+        
+        // Start conversion button
+        this.startConversionBtn.addEventListener('click', () => {
+            this.convertFile();
+        });
+        
+        // Refresh history button
+        this.refreshHistoryBtn.addEventListener('click', () => {
+            this.loadConversionHistory();
+        });
     }
     
     handleFile(file) {
@@ -70,8 +102,8 @@ class PDFConverter {
         this.currentFileName = file.name;
         this.fileName.textContent = file.name;
         
-        // Show progress area
-        this.showProgressArea();
+        // Show options area first
+        this.showOptionsArea();
         
         // Upload file
         this.uploadFile(file);
@@ -90,12 +122,19 @@ class PDFConverter {
             'image/gif',
             'image/bmp',
             'image/tiff',
-            'text/plain'
+            'text/plain',
+            'text/csv',
+            'application/pdf',
+            'application/rtf',
+            'application/vnd.oasis.opendocument.text',
+            'application/vnd.oasis.opendocument.spreadsheet',
+            'application/vnd.oasis.opendocument.presentation'
         ];
         
         const allowedExtensions = [
             'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt',
-            'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'txt'
+            'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'txt',
+            'csv', 'pdf', 'rtf', 'odt', 'ods', 'odp'
         ];
         
         const fileExtension = file.name.split('.').pop().toLowerCase();
@@ -134,12 +173,10 @@ class PDFConverter {
             }
             
             this.currentFileId = result.file_id;
-            this.updateProgress(50, 'File uploaded successfully...');
+            this.updateProgress(100, 'File uploaded successfully! Configure options and convert.');
             
-            // Start conversion
-            setTimeout(() => {
-                this.convertFile();
-            }, 500);
+            // Show options instead of auto-converting
+            this.showOptionsArea();
             
         } catch (error) {
             this.showError('Upload failed: ' + error.message);
@@ -149,6 +186,7 @@ class PDFConverter {
     
     async convertFile() {
         try {
+            this.showProgressArea();
             this.updateProgress(75, 'Converting to PDF...');
             
             const response = await fetch('/convert', {
@@ -158,7 +196,9 @@ class PDFConverter {
                 },
                 body: JSON.stringify({
                     file_id: this.currentFileId,
-                    original_filename: this.currentFileName
+                    original_filename: this.currentFileName,
+                    password: this.passwordInput.value || null,
+                    quality: this.qualitySelect.value
                 })
             });
             
@@ -170,14 +210,145 @@ class PDFConverter {
             
             this.updateProgress(100, 'Conversion completed!');
             
+            // Load preview if available
+            this.loadPreview();
+            
             setTimeout(() => {
                 this.showSuccessArea();
+                this.loadConversionHistory(); // Refresh history
             }, 1000);
             
         } catch (error) {
             this.showError('Conversion failed: ' + error.message);
             this.resetInterface();
         }
+    }
+    
+    async handleBatchFiles(files) {
+        try {
+            this.showProgressArea();
+            this.updateProgress(25, 'Uploading batch files...');
+            
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append('files', file);
+            });
+            
+            const response = await fetch('/batch-upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.error || 'Batch upload failed');
+            }
+            
+            this.batchFiles = result.files;
+            this.updateProgress(100, `${result.files.length} files uploaded successfully!`);
+            
+            // Start batch conversion
+            setTimeout(() => {
+                this.processBatchConversion();
+            }, 1000);
+            
+        } catch (error) {
+            this.showError('Batch upload failed: ' + error.message);
+            this.resetInterface();
+        }
+    }
+    
+    async processBatchConversion() {
+        let completed = 0;
+        const total = this.batchFiles.length;
+        
+        for (const fileInfo of this.batchFiles) {
+            try {
+                this.updateProgress((completed / total) * 100, `Converting ${fileInfo.original_filename}...`);
+                
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: fileInfo.file_id,
+                        original_filename: fileInfo.original_filename,
+                        quality: this.qualitySelect.value
+                    })
+                });
+                
+                completed++;
+                
+            } catch (error) {
+                console.error(`Failed to convert ${fileInfo.original_filename}:`, error);
+            }
+        }
+        
+        this.updateProgress(100, `Batch conversion completed! ${completed}/${total} files converted.`);
+        this.loadConversionHistory();
+        
+        setTimeout(() => {
+            this.showSuccessArea();
+        }, 1000);
+    }
+    
+    async loadPreview() {
+        if (!this.currentFileId) return;
+        
+        try {
+            const response = await fetch(`/preview/${this.currentFileId}`);
+            const result = await response.json();
+            
+            if (response.ok && result.preview) {
+                this.previewContent.innerHTML = `<pre>${result.preview}</pre>`;
+                this.previewContainer.classList.remove('d-none');
+            }
+        } catch (error) {
+            console.error('Preview failed:', error);
+        }
+    }
+    
+    async loadConversionHistory() {
+        try {
+            const response = await fetch('/history');
+            const result = await response.json();
+            
+            if (response.ok && result.files) {
+                this.displayHistory(result.files);
+            } else {
+                this.historyList.innerHTML = '<p class="text-muted">No conversion history available.</p>';
+            }
+        } catch (error) {
+            this.historyList.innerHTML = '<p class="text-danger">Failed to load history.</p>';
+        }
+    }
+    
+    displayHistory(files) {
+        if (files.length === 0) {
+            this.historyList.innerHTML = '<p class="text-muted">No converted files yet.</p>';
+            return;
+        }
+        
+        const historyHTML = files.map(file => {
+            const date = new Date(file.created * 1000).toLocaleString();
+            const sizeKB = Math.round(file.size / 1024);
+            return `
+                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                    <div>
+                        <strong>${file.filename}</strong>
+                        <br>
+                        <small class="text-muted">${date} • ${sizeKB} KB</small>
+                    </div>
+                    <a href="/download/${file.filename.replace('.pdf', '')}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+            `;
+        }).join('');
+        
+        this.historyList.innerHTML = historyHTML;
     }
     
     downloadFile() {
@@ -198,14 +369,23 @@ class PDFConverter {
         this.progressText.textContent = text;
     }
     
+    showOptionsArea() {
+        this.uploadArea.classList.add('d-none');
+        this.progressArea.classList.add('d-none');
+        this.optionsArea.classList.remove('d-none');
+        this.optionsArea.classList.add('fade-in');
+    }
+    
     showProgressArea() {
         this.uploadArea.classList.add('d-none');
+        this.optionsArea.classList.add('d-none');
         this.progressArea.classList.remove('d-none');
         this.progressArea.classList.add('fade-in');
     }
     
     showSuccessArea() {
         this.progressArea.classList.add('d-none');
+        this.optionsArea.classList.add('d-none');
         this.successArea.classList.remove('d-none');
         this.successArea.classList.add('slide-up');
     }
@@ -213,22 +393,28 @@ class PDFConverter {
     resetInterface() {
         // Hide all areas
         this.progressArea.classList.add('d-none');
+        this.optionsArea.classList.add('d-none');
         this.successArea.classList.add('d-none');
+        this.previewContainer.classList.add('d-none');
         
         // Show upload area
         this.uploadArea.classList.remove('d-none');
         
         // Reset form
         this.fileInput.value = '';
+        this.batchFileInput.value = '';
+        this.passwordInput.value = '';
         this.progressBar.style.width = '0%';
         this.progressText.textContent = 'Uploading...';
         
         // Reset state
         this.currentFileId = null;
         this.currentFileName = null;
+        this.batchFiles = [];
         
         // Remove animation classes
         this.progressArea.classList.remove('fade-in');
+        this.optionsArea.classList.remove('fade-in');
         this.successArea.classList.remove('slide-up');
     }
     

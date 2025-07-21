@@ -91,8 +91,20 @@ body {
     font-size: 0.8rem;
 }
 
-.progress-area {
+.progress-area, .options-area {
     padding: 2rem;
+}
+
+.options-area .form-select, .options-area .form-control {
+    border-radius: 15px;
+}
+
+.btn-group .btn {
+    border-radius: 25px !important;
+}
+
+.btn-group .btn:first-child {
+    margin-right: 0.5rem;
 }
 
 .file-info {
