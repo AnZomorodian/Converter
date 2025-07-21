@@ -14,6 +14,14 @@ ALLOWED_EXTENSIONS = {
     'html', 'htm', 'xml', 'json', 'md', 'py', 'js', 'css'
 }
 
+# PDF operation modes
+PDF_OPERATIONS = {
+    'pdf-to-word': 'Convert PDF to Word',
+    'pdf-password': 'Add Password to PDF', 
+    'pdf-merge': 'Merge Multiple PDFs',
+    'any-to-pdf': 'Convert Any File to PDF'
+}
+
 def allowed_file(filename):
     if not filename or '.' not in filename:
         return False
@@ -226,14 +234,35 @@ def conversion_history():
                         'created': stat.st_mtime
                     })
         
-        # Sort by creation time (newest first)
+        # Sort by creation time (newest first) and limit to 5
         converted_files.sort(key=lambda x: x['created'], reverse=True)
         
-        return jsonify({'files': converted_files[:20]})  # Last 20 files
+        return jsonify({'files': converted_files[:5]})  # Last 5 files
     
     except Exception as e:
         logging.error(f"History error: {str(e)}")
         return jsonify({'error': 'Failed to load history'}), 500
+
+@app.route('/delete/<filename>', methods=['DELETE'])
+def delete_file(filename):
+    """Delete a converted file"""
+    try:
+        # Ensure filename is safe
+        filename = secure_filename(filename)
+        if not filename.endswith('.pdf'):
+            filename += '.pdf'
+            
+        file_path = os.path.join(current_app.config['CONVERTED_FOLDER'], filename)
+        
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return jsonify({'success': True})
+        else:
+            return jsonify({'error': 'File not found'}), 404
+    
+    except Exception as e:
+        logging.error(f"File deletion error: {str(e)}")
+        return jsonify({'error': 'Failed to delete file'}), 500
 
 @app.errorhandler(413)
 def too_large(e):

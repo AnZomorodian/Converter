@@ -98,10 +98,16 @@ The application is configured for flexible deployment:
 ✓ Enhanced supported file formats (CSV, PDF, RTF, ODT, ODS, ODP, HTML, XML, JSON, MD, PY, JS, CSS)
 ✓ Implemented conversion options (quality settings, password protection framework, custom output names)
 ✓ Added file preview functionality for images and text files
-✓ Created conversion history tracking and display
+✓ Created conversion history tracking and display (limited to last 5 files)
 ✓ Improved error handling and validation
 ✓ Enhanced UI with options area and better progress tracking
 ✓ Added transparent footer with Fily branding, DeepInk Team credit, GitHub/Telegram icons
 ✓ Improved drag & drop area with animated pulse effect and format badges
 ✓ Enhanced drag & drop functionality to handle single and multiple files properly
+✓ Fixed multiple file dialog bug preventing duplicate upload dialogs
+✓ Added delete functionality for recent conversions with trash icon
+✓ Redesigned header with "Fily Pro" branding and dropdown conversion menu
+✓ Added PDF-to-PDF conversion modes (PDF to Word, Password Protection, Merge PDFs)
+✓ Enhanced hero section with animated floating icon and feature badges
+✓ Improved responsive design and mobile compatibility
 ✓ Added system dependency installation for LibreOffice
