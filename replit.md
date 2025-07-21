@@ -1,0 +1,87 @@
+# File to PDF Converter
+
+## Overview
+
+This is a Flask-based web application that converts various file formats (Word documents, Excel spreadsheets, PowerPoint presentations, images, and text files) to PDF format. The application provides a simple drag-and-drop interface for file uploads and uses LibreOffice for document conversions.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+The application follows a traditional Flask web application architecture with a clean separation of concerns:
+
+- **Frontend**: Bootstrap-based responsive UI with drag-and-drop functionality
+- **Backend**: Flask web framework with file upload and conversion capabilities
+- **File Processing**: LibreOffice headless mode for document conversions
+- **Storage**: Local file system for temporary file storage
+
+## Key Components
+
+### 1. Flask Application (`app.py`)
+- Main application configuration and initialization
+- Sets up file upload limits (50MB max)
+- Configures upload and converted file directories
+- Implements ProxyFix middleware for deployment behind reverse proxies
+
+### 2. Route Handlers (`routes.py`)
+- `/` - Serves the main upload interface
+- `/upload` - Handles file uploads with validation
+- File type validation for supported formats (DOC, DOCX, XLS, XLSX, PPT, PPTX, images, TXT)
+- UUID-based file naming to prevent conflicts
+
+### 3. Conversion Engine (`converter.py`)
+- Modular conversion system supporting multiple file formats
+- LibreOffice headless mode for Office document conversions
+- Separate conversion functions for different file types
+- Error handling and logging for conversion failures
+
+### 4. Frontend Interface
+- **HTML Template** (`templates/index.html`): Bootstrap-based responsive design
+- **CSS Styling** (`static/css/style.css`): Custom styling with gradient backgrounds and hover effects
+- **JavaScript** (`static/js/main.js`): Drag-and-drop functionality and AJAX file uploads
+
+## Data Flow
+
+1. **File Upload**: User selects or drags a file to the upload area
+2. **Validation**: Server validates file type and size constraints
+3. **Storage**: File is saved with a unique UUID-based filename
+4. **Conversion**: Appropriate converter is called based on file extension
+5. **Response**: Converted PDF is made available for download
+6. **Cleanup**: Temporary files are managed (implementation pending)
+
+## External Dependencies
+
+### System Dependencies
+- **LibreOffice**: Required for converting Office documents (Word, Excel, PowerPoint)
+- **Python Packages**: Flask, Werkzeug for web framework functionality
+
+### Frontend Dependencies
+- **Bootstrap 5.3.0**: UI framework for responsive design
+- **Font Awesome 6.0.0**: Icon library for visual elements
+
+## Deployment Strategy
+
+The application is configured for flexible deployment:
+
+- **Development**: Direct Flask development server (`app.run()`)
+- **Production**: WSGI-compatible with ProxyFix middleware for reverse proxy deployment
+- **Environment Configuration**: Uses environment variables for sensitive settings (SESSION_SECRET)
+- **File System**: Requires persistent storage for upload and converted directories
+
+### Key Deployment Considerations
+
+1. **File Storage**: Currently uses local file system - may need cloud storage for scalability
+2. **LibreOffice Dependency**: Must be installed on deployment environment
+3. **Resource Management**: No automatic cleanup of temporary files implemented
+4. **Security**: File type validation prevents most malicious uploads
+5. **Scalability**: Single-threaded conversion process may become bottleneck
+
+## Technical Notes
+
+- **File Size Limit**: 50MB maximum per upload
+- **Supported Formats**: DOC/DOCX, XLS/XLSX, PPT/PPTX, common image formats, TXT
+- **Conversion Timeout**: 60-second timeout for LibreOffice operations
+- **Error Handling**: Comprehensive logging for debugging conversion issues
+- **File Naming**: UUID-based system prevents filename conflicts
