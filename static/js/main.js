@@ -412,9 +412,22 @@ class FilyPro {
             const result = await response.json();
             
             if (result.success) {
-                this.showSuccess('File deleted successfully');
-                // Reload the recent conversions list
-                await this.loadRecentConversions();
+                this.showSuccess(`File deleted successfully (${result.files_deleted || 1} file(s))`);
+                // Remove the item from DOM immediately for inline effect
+                const recentItem = deleteButton.closest('.recent-item');
+                if (recentItem) {
+                    recentItem.style.transition = 'all 0.3s ease';
+                    recentItem.style.transform = 'translateX(-100%)';
+                    recentItem.style.opacity = '0';
+                    setTimeout(() => {
+                        recentItem.remove();
+                        // Check if no items left and show empty message
+                        const remainingItems = document.querySelectorAll('.recent-item');
+                        if (remainingItems.length === 0) {
+                            this.recentConversions.innerHTML = '<p class="text-muted text-center">No recent conversions</p>';
+                        }
+                    }, 300);
+                }
             } else {
                 this.showError(result.error || 'Failed to delete file');
                 // Reset button state
@@ -425,7 +438,7 @@ class FilyPro {
             }
         } catch (error) {
             console.error('Error deleting conversion:', error);
-            this.showError('Failed to delete file');
+            this.showError('Network error: Failed to delete file');
             // Reset button state
             if (deleteButton) {
                 deleteButton.disabled = false;

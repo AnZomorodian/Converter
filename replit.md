@@ -161,6 +161,10 @@ The application is configured for flexible deployment:
 ✓ **Added Legal Pages**: Created comprehensive Privacy Policy and Terms of Service pages with professional styling
 ✓ **Enhanced File Type Support**: Added PDF support to allowed extensions for merge operations
 ✓ **Improved User Experience**: File dialogs now filter to show only relevant file types for each conversion mode
+✓ **Fixed Logging Error**: Added missing logging import to prevent delete notification errors
+✓ **Inline Delete Animation**: Delete now works instantly with smooth slide-out animation, no refresh needed
+✓ **Enhanced Delete Feedback**: Shows file count and better error messages for delete operations
+✓ **Improved Notifications**: Added smooth slide-in animations for all notification messages
 
 ## Major Update (July 21, 2025) - GitHub-Ready Release
 
