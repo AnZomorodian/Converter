@@ -1,294 +1,264 @@
 import os
 import uuid
-from datetime import datetime
-from flask import render_template, request, jsonify, send_file, current_app, Response, stream_template
-from werkzeug.utils import secure_filename
-from app import app, db
-from converter import convert_to_pdf
-from models import ConversionHistory, SystemStats, FileMetadata
-from utils import (
-    calculate_file_hash, get_file_mime_type, get_image_dimensions,
-    count_document_pages, count_words_in_text, validate_file_security,
-    format_file_size, cleanup_old_files, set_conversion_progress,
-    get_conversion_progress
-)
-from pathlib import Path
-import logging
 import json
-import time
+import logging
+from datetime import datetime
+from flask import render_template, request, redirect, url_for, flash, jsonify, send_file, session
+from werkzeug.utils import secure_filename
+from app import app
+from converter import convert_to_pdf
+from storage import storage
 
+# Allowed file extensions
 ALLOWED_EXTENSIONS = {
-    'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 
-    'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'txt',
-    'pdf', 'rtf', 'odt', 'ods', 'odp', 'csv',
-    'html', 'htm', 'xml', 'json', 'md', 'py', 'js', 'css'
-}
-
-# PDF operation modes
-PDF_OPERATIONS = {
-    'pdf-to-word': 'Convert PDF to Word',
-    'pdf-password': 'Add Password to PDF', 
-    'pdf-merge': 'Merge Multiple PDFs',
-    'any-to-pdf': 'Convert Any File to PDF'
+    'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
+    'txt', 'rtf', 'odt', 'ods', 'odp', 'csv',
+    'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff',
+    'md', 'html'
 }
 
 def allowed_file(filename):
-    if not filename or '.' not in filename:
-        return False
-    parts = filename.rsplit('.', 1)
-    if len(parts) < 2:
-        return False
-    return parts[1].lower() in ALLOWED_EXTENSIONS
+    """Check if file extension is allowed"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """Main page with file upload interface"""
+    recent_conversions = storage.get_recent_conversions(5)
+    return render_template('index.html', recent_conversions=recent_conversions)
 
 @app.route('/upload', methods=['POST'])
-def upload_file():
-    try:
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file selected'}), 400
-        
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
-        
-        if not allowed_file(file.filename):
-            return jsonify({'error': 'File type not supported'}), 400
-        
-        # Generate unique filename
-        file_id = str(uuid.uuid4())
-        original_filename = secure_filename(file.filename or 'untitled')
-        
-        # Handle file extension safely
-        parts = original_filename.rsplit('.', 1)
-        if len(parts) < 2:
-            return jsonify({'error': 'File must have an extension'}), 400
-        file_extension = parts[1].lower()
-        upload_filename = f"{file_id}.{file_extension}"
-        
-        # Save uploaded file
-        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], upload_filename)
-        file.save(upload_path)
-        
-        logging.info(f"File uploaded: {upload_filename}")
-        
-        # Get file size for progress tracking
-        file_size = os.path.getsize(upload_path)
-        
-        return jsonify({
-            'file_id': file_id,
-            'original_filename': original_filename,
-            'file_size': file_size,
-            'file_extension': file_extension,
-            'message': 'File uploaded successfully'
-        })
+def upload_files():
+    """Handle file upload and conversion"""
+    if 'files[]' not in request.files:
+        return jsonify({'success': False, 'error': 'No files selected'})
     
-    except Exception as e:
-        logging.error(f"Upload error: {str(e)}")
-        return jsonify({'error': 'Upload failed'}), 500
-
-@app.route('/batch-upload', methods=['POST'])
-def batch_upload():
-    """Handle multiple file uploads"""
-    try:
-        files = request.files.getlist('files')
-        if not files:
-            return jsonify({'error': 'No files selected'}), 400
-        
-        results = []
-        for file in files:
-            if file.filename and allowed_file(file.filename):
+    files = request.files.getlist('files[]')
+    conversion_type = request.form.get('conversion_type', 'document-to-pdf')
+    quality = request.form.get('quality', 'high')
+    custom_name = request.form.get('custom_name', '')
+    
+    if not files or all(file.filename == '' for file in files):
+        return jsonify({'success': False, 'error': 'No files selected'})
+    
+    results = []
+    
+    for file in files:
+        if file and allowed_file(file.filename):
+            try:
+                # Generate unique filename
                 file_id = str(uuid.uuid4())
-                original_filename = secure_filename(file.filename)
-                parts = original_filename.rsplit('.', 1)
-                if len(parts) >= 2:
-                    file_extension = parts[1].lower()
-                    upload_filename = f"{file_id}.{file_extension}"
-                    upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], upload_filename)
-                    file.save(upload_path)
-                    file_size = os.path.getsize(upload_path)
+                filename = secure_filename(file.filename or 'unknown_file')
+                file_extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'unknown'
+                
+                # Save original file
+                original_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{file_id}_{filename}")
+                file.save(original_path)
+                
+                # Convert file to PDF
+                output_filename = custom_name if custom_name else f"{file_id}_converted.pdf"
+                converted_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
+                success = convert_to_pdf(original_path, converted_path, filename, quality=quality)
+                
+                if success and os.path.exists(converted_path):
+                    # Store conversion record
+                    conversion_data = {
+                        'file_id': file_id,
+                        'original_filename': filename,
+                        'file_extension': file_extension,
+                        'file_size': os.path.getsize(original_path),
+                        'conversion_type': conversion_type,
+                        'quality_setting': quality,
+                        'status': 'completed',
+                        'converted_path': converted_path,
+                        'created_at': datetime.now().isoformat()
+                    }
+                    storage.add_conversion(conversion_data)
                     
                     results.append({
-                        'file_id': file_id,
-                        'original_filename': original_filename,
-                        'file_size': file_size,
-                        'file_extension': file_extension
+                        'success': True,
+                        'filename': filename,
+                        'download_url': url_for('download_file', file_id=file_id),
+                        'file_id': file_id
                     })
-        
-        return jsonify({
-            'files': results,
-            'message': f'Successfully uploaded {len(results)} files'
-        })
-    
-    except Exception as e:
-        logging.error(f"Batch upload error: {str(e)}")
-        return jsonify({'error': 'Batch upload failed'}), 500
-
-@app.route('/convert', methods=['POST'])
-def convert_file():
-    try:
-        data = request.get_json()
-        file_id = data.get('file_id')
-        original_filename = data.get('original_filename')
-        
-        if not file_id or not original_filename:
-            return jsonify({'error': 'Missing file information'}), 400
-        
-        # Find the uploaded file
-        upload_files = os.listdir(current_app.config['UPLOAD_FOLDER'])
-        upload_file = None
-        for f in upload_files:
-            if f.startswith(file_id):
-                upload_file = f
-                break
-        
-        if not upload_file:
-            return jsonify({'error': 'File not found'}), 404
-        
-        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], upload_file)
-        
-        # Get conversion options
-        password = data.get('password', None)
-        quality = data.get('quality', 'high')
-        output_name = data.get('output_name', None)
-        
-        # Convert to PDF
-        if output_name:
-            # Ensure PDF extension
-            if not output_name.lower().endswith('.pdf'):
-                output_name += '.pdf'
-            pdf_filename = f"{file_id}_{secure_filename(output_name)}"
+                    
+                    logging.info(f"Successfully converted {filename} to PDF")
+                    
+                else:
+                    # Store failed conversion
+                    conversion_data = {
+                        'file_id': file_id,
+                        'original_filename': filename,
+                        'file_extension': file_extension,
+                        'file_size': os.path.getsize(original_path),
+                        'conversion_type': conversion_type,
+                        'quality_setting': quality,
+                        'status': 'failed',
+                        'error_message': 'Conversion failed',
+                        'created_at': datetime.now().isoformat()
+                    }
+                    storage.add_conversion(conversion_data)
+                    
+                    results.append({
+                        'success': False,
+                        'filename': filename,
+                        'error': 'Conversion failed'
+                    })
+                    
+            except Exception as e:
+                logging.error(f"Error processing file {file.filename}: {str(e)}")
+                results.append({
+                    'success': False,
+                    'filename': file.filename,
+                    'error': str(e)
+                })
         else:
-            pdf_filename = f"{file_id}.pdf"
-        pdf_path = os.path.join(current_app.config['CONVERTED_FOLDER'], pdf_filename)
-        
-        success = convert_to_pdf(upload_path, pdf_path, original_filename, password=password, quality=quality)
-        
-        if success:
-            # Clean up uploaded file
-            os.remove(upload_path)
-            
-            return jsonify({
-                'file_id': file_id,
-                'pdf_filename': pdf_filename,
-                'message': 'Conversion successful'
+            results.append({
+                'success': False,
+                'filename': file.filename,
+                'error': 'File type not supported'
             })
-        else:
-            return jsonify({'error': 'Conversion failed'}), 500
     
-    except Exception as e:
-        logging.error(f"Conversion error: {str(e)}")
-        return jsonify({'error': 'Conversion failed'}), 500
+    return jsonify({'results': results})
 
 @app.route('/download/<file_id>')
 def download_file(file_id):
+    """Download converted PDF file"""
     try:
-        # Try with .pdf extension first
-        pdf_filename = f"{file_id}.pdf"
-        pdf_path = os.path.join(current_app.config['CONVERTED_FOLDER'], pdf_filename)
+        # Search for the converted file
+        converted_folder = app.config['CONVERTED_FOLDER']
+        for filename in os.listdir(converted_folder):
+            if filename.startswith(file_id):
+                file_path = os.path.join(converted_folder, filename)
+                if os.path.exists(file_path):
+                    return send_file(file_path, as_attachment=True, download_name=filename)
         
-        # If not found, try without extension (in case file_id already includes .pdf)
-        if not os.path.exists(pdf_path):
-            pdf_path = os.path.join(current_app.config['CONVERTED_FOLDER'], file_id)
-            pdf_filename = file_id
+        return jsonify({'success': False, 'error': 'File not found'}), 404
         
-        # If still not found, search for any file starting with file_id
-        if not os.path.exists(pdf_path):
-            converted_folder = current_app.config['CONVERTED_FOLDER']
-            for filename in os.listdir(converted_folder):
+    except Exception as e:
+        logging.error(f"Error downloading file {file_id}: {str(e)}")
+        return jsonify({'success': False, 'error': 'Download failed'}), 500
+
+@app.route('/api/recent-conversions')
+def get_recent_conversions():
+    """Get recent conversion history"""
+    try:
+        conversions = storage.get_recent_conversions(10)
+        return jsonify({
+            'success': True,
+            'conversions': conversions
+        })
+    except Exception as e:
+        logging.error(f"Error getting recent conversions: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get recent conversions'
+        }), 500
+
+@app.route('/api/stats')
+def get_stats():
+    """Get conversion statistics"""
+    try:
+        stats = storage.get_stats()
+        return jsonify({
+            'success': True,
+            'stats': stats
+        })
+    except Exception as e:
+        logging.error(f"Error getting stats: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get statistics'
+        }), 500
+
+@app.route('/api/supported-formats')
+def get_supported_formats():
+    """Get supported file formats"""
+    formats = {
+        "documents": {
+            "name": "Documents",
+            "icon": "fas fa-file-word",
+            "formats": ["DOC", "DOCX", "RTF", "TXT", "ODT", "MD"]
+        },
+        "spreadsheets": {
+            "name": "Spreadsheets", 
+            "icon": "fas fa-file-excel",
+            "formats": ["XLS", "XLSX", "CSV", "ODS"]
+        },
+        "presentations": {
+            "name": "Presentations",
+            "icon": "fas fa-file-powerpoint", 
+            "formats": ["PPT", "PPTX", "ODP"]
+        },
+        "images": {
+            "name": "Images",
+            "icon": "fas fa-image",
+            "formats": ["PNG", "JPG", "JPEG", "GIF", "BMP", "TIFF"]
+        },
+        "other_formats": {
+            "name": "Other", 
+            "icon": "fas fa-plus-circle",
+            "formats": ["HTML", "XML"]
+        }
+    }
+    
+    return jsonify({
+        "success": True,
+        "formats": formats,
+        "total_formats": sum(len(cat["formats"]) for cat in formats.values()),
+        "categories": len(formats)
+    })
+
+@app.route('/api/delete-conversion/<file_id>', methods=['DELETE'])
+def delete_conversion(file_id):
+    """Delete a conversion record and associated files"""
+    try:
+        # Remove files
+        for folder in [app.config['UPLOAD_FOLDER'], app.config['CONVERTED_FOLDER']]:
+            for filename in os.listdir(folder):
                 if filename.startswith(file_id):
-                    pdf_path = os.path.join(converted_folder, filename)
-                    pdf_filename = filename
-                    break
+                    file_path = os.path.join(folder, filename)
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
         
-        if not os.path.exists(pdf_path):
-            return jsonify({'error': 'File not found'}), 404
+        return jsonify({
+            'success': True,
+            'message': 'File deleted successfully'
+        })
         
-        return send_file(pdf_path, as_attachment=True, download_name=f"converted_{pdf_filename}")
-    
     except Exception as e:
-        logging.error(f"Download error: {str(e)}")
-        return jsonify({'error': 'Download failed'}), 500
+        logging.error(f"Error deleting conversion {file_id}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to delete file'
+        }), 500
 
-@app.route('/preview/<file_id>')
-def preview_file(file_id):
-    """Generate preview image for uploaded file"""
-    try:
-        upload_files = os.listdir(current_app.config['UPLOAD_FOLDER'])
-        upload_file = None
-        for f in upload_files:
-            if f.startswith(file_id):
-                upload_file = f
-                break
-        
-        if not upload_file:
-            return jsonify({'error': 'File not found'}), 404
-        
-        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], upload_file)
-        file_extension = Path(upload_path).suffix.lower()
-        
-        # Generate preview based on file type
-        if file_extension in ['.png', '.jpg', '.jpeg', '.gif', '.bmp']:
-            return send_file(upload_path, mimetype='image/*')
-        elif file_extension == '.txt':
-            with open(upload_path, 'r', encoding='utf-8') as f:
-                content = f.read()[:500] + '...' if len(f.read()) > 500 else f.read()
-            return jsonify({'preview': content, 'type': 'text'})
-        else:
-            return jsonify({'preview': 'Preview not available for this file type', 'type': 'info'})
-    
-    except Exception as e:
-        logging.error(f"Preview error: {str(e)}")
-        return jsonify({'error': 'Preview failed'}), 500
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    if request.path.startswith('/api/'):
+        return jsonify({
+            "success": False,
+            "error": "API endpoint not found",
+            "code": 404
+        }), 404
+    return render_template('404.html'), 404
 
-@app.route('/history')
-def conversion_history():
-    """Get conversion history"""
-    try:
-        converted_files = []
-        if os.path.exists(current_app.config['CONVERTED_FOLDER']):
-            for file in os.listdir(current_app.config['CONVERTED_FOLDER']):
-                if file.endswith('.pdf'):
-                    file_path = os.path.join(current_app.config['CONVERTED_FOLDER'], file)
-                    stat = os.stat(file_path)
-                    converted_files.append({
-                        'filename': file,
-                        'size': stat.st_size,
-                        'created': stat.st_mtime
-                    })
-        
-        # Sort by creation time (newest first) and limit to 5
-        converted_files.sort(key=lambda x: x['created'], reverse=True)
-        
-        return jsonify({'files': converted_files[:5]})  # Last 5 files
-    
-    except Exception as e:
-        logging.error(f"History error: {str(e)}")
-        return jsonify({'error': 'Failed to load history'}), 500
-
-@app.route('/delete/<filename>', methods=['DELETE'])
-def delete_file(filename):
-    """Delete a converted file"""
-    try:
-        # Ensure filename is safe
-        filename = secure_filename(filename)
-        if not filename.endswith('.pdf'):
-            filename += '.pdf'
-            
-        file_path = os.path.join(current_app.config['CONVERTED_FOLDER'], filename)
-        
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            return jsonify({'success': True})
-        else:
-            return jsonify({'error': 'File not found'}), 404
-    
-    except Exception as e:
-        logging.error(f"File deletion error: {str(e)}")
-        return jsonify({'error': 'Failed to delete file'}), 500
+@app.errorhandler(500)
+def internal_error(error):
+    if request.path.startswith('/api/'):
+        return jsonify({
+            "success": False,
+            "error": "Internal server error",
+            "code": 500
+        }), 500
+    return render_template('500.html'), 500
 
 @app.errorhandler(413)
-def too_large(e):
-    return jsonify({'error': 'File too large. Maximum size is 50MB.'}), 413
+def too_large(error):
+    return jsonify({
+        "success": False,
+        "error": "File too large. Maximum size is 50MB",
+        "code": 413
+    }), 413

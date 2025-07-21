@@ -1,443 +1,387 @@
-class PDFConverter {
+// Modern JavaScript for Fily Pro - File to PDF Converter
+class FilyPro {
     constructor() {
+        this.selectedType = null;
+        this.selectedFiles = [];
+        this.isConverting = false;
+        
         this.initializeElements();
-        this.attachEventListeners();
-        this.loadConversionHistory();
-        this.selectedConversionType = null;
-        this.hideUploadAreaInitially();
+        this.setupEventListeners();
+        this.loadRecentConversions();
     }
-    
+
     initializeElements() {
-        // File inputs
+        // Main elements
+        this.conversionTypeCard = document.getElementById('conversionTypeCard');
+        this.uploadCard = document.getElementById('uploadCard');
         this.fileInput = document.getElementById('fileInput');
-        this.batchFileInput = document.getElementById('batchFileInput');
-        
-        // Upload area
         this.uploadArea = document.getElementById('uploadArea');
-        
-        // Form elements
-        this.passwordInput = document.getElementById('passwordInput');
-        this.qualitySelect = document.getElementById('qualitySelect');
-        this.outputNameInput = document.getElementById('outputNameInput');
-        
-        // Buttons
-        this.startConversionBtn = document.getElementById('startConversionBtn');
-        this.downloadBtn = document.getElementById('downloadBtn');
-        this.convertAnotherBtn = document.getElementById('convertAnotherBtn');
-        this.refreshHistoryBtn = document.getElementById('refreshHistoryBtn');
-        
-        // Display areas
-        this.optionsArea = document.getElementById('optionsArea');
-        this.progressArea = document.getElementById('progressArea');
-        this.successArea = document.getElementById('successArea');
-        this.previewContainer = document.getElementById('previewContainer');
-        this.previewContent = document.getElementById('previewContent');
-        
-        // Progress elements
-        this.progressBar = document.querySelector('.progress-bar');
+        this.filesPreview = document.getElementById('filesPreview');
+        this.filesList = document.getElementById('filesList');
+        this.convertButton = document.getElementById('convertButton');
+        this.progressSection = document.getElementById('progressSection');
+        this.progressBar = document.getElementById('progressBar');
         this.progressText = document.getElementById('progressText');
-        this.fileName = document.getElementById('fileName');
-        
-        // History
-        this.historyList = document.getElementById('historyList');
-        
-        // State
-        this.currentFileId = null;
-        this.currentFileName = null;
-        this.batchFiles = [];
-        this.selectedConversionType = null;
+        this.backButton = document.getElementById('backButton');
+        this.convertSection = document.getElementById('convertSection');
+        this.conversionOptions = document.getElementById('conversionOptions');
+        this.recentConversions = document.getElementById('recentConversions');
     }
-    
-    hideUploadAreaInitially() {
-        this.uploadArea.classList.add('initial-hidden');
+
+    setupEventListeners() {
+        // Conversion type selection
+        document.querySelectorAll('.conversion-option').forEach(option => {
+            option.addEventListener('click', (e) => this.selectConversionType(e.target.closest('.conversion-option')));
+        });
+
+        // File input and upload area
+        this.fileInput?.addEventListener('change', (e) => this.handleFileSelect(e));
+        
+        if (this.uploadArea) {
+            this.uploadArea.addEventListener('click', () => this.fileInput.click());
+            this.uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
+            this.uploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+            this.uploadArea.addEventListener('drop', (e) => this.handleFileDrop(e));
+        }
+
+        // Convert button
+        this.convertButton?.addEventListener('click', () => this.convertFiles());
+
+        // Back button
+        this.backButton?.addEventListener('click', () => this.goBack());
+
+        // Prevent default drag behavior on document
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
     }
-    
-    showUploadArea() {
-        this.uploadArea.classList.remove('initial-hidden', 'd-none');
-        document.getElementById('conversionTypeSelector').style.display = 'none';
-        document.getElementById('supportedFormatsSection').style.display = 'none';
-        document.getElementById('backButtonContainer').style.display = 'block';
+
+    selectConversionType(option) {
+        // Remove previous selection
+        document.querySelectorAll('.conversion-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+
+        // Select new option
+        option.classList.add('selected');
+        this.selectedType = option.dataset.type;
+
+        // Show upload card after a short delay
+        setTimeout(() => {
+            this.conversionTypeCard.style.display = 'none';
+            this.uploadCard.style.display = 'block';
+            this.uploadCard.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
     }
-    
-    attachEventListeners() {
-        // File input change
-        this.fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                this.handleFile(e.target.files[0]);
-            }
-        });
-        
-        // Batch file input change
-        this.batchFileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                this.handleBatchFiles(Array.from(e.target.files));
-            }
-        });
-        
-        // Enhanced drag and drop events
-        this.uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.uploadArea.classList.add('dragover');
-        });
-        
-        this.uploadArea.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.uploadArea.classList.add('dragover');
-        });
-        
-        this.uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (!this.uploadArea.contains(e.relatedTarget)) {
-                this.uploadArea.classList.remove('dragover');
-            }
-        });
-        
-        this.uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+
+    goBack() {
+        this.uploadCard.style.display = 'none';
+        this.conversionTypeCard.style.display = 'block';
+        this.resetUpload();
+    }
+
+    resetUpload() {
+        this.selectedFiles = [];
+        this.filesList.innerHTML = '';
+        this.filesPreview.style.display = 'none';
+        this.convertSection.style.display = 'none';
+        this.conversionOptions.style.display = 'none';
+        this.progressSection.style.display = 'none';
+        this.isConverting = false;
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        this.uploadArea.classList.add('dragover');
+    }
+
+    handleDragLeave(e) {
+        e.preventDefault();
+        if (!this.uploadArea.contains(e.relatedTarget)) {
             this.uploadArea.classList.remove('dragover');
-            
-            const files = Array.from(e.dataTransfer.files);
-            if (files.length > 1) {
-                this.handleBatchFiles(files);
-            } else if (files.length === 1) {
-                this.handleFile(files[0]);
-            }
-        });
-        
-        // Click to upload - prevent multiple triggers
-        this.uploadArea.addEventListener('click', (e) => {
-            if (!e.target.closest('.btn')) {
-                this.fileInput.click();
-            }
-        });
-        
-        // Buttons
-        this.downloadBtn.addEventListener('click', () => {
-            this.downloadFile();
-        });
-        
-        this.convertAnotherBtn.addEventListener('click', () => {
-            this.resetInterface();
-        });
-        
-        this.startConversionBtn.addEventListener('click', () => {
-            this.convertFile();
-        });
-        
-        this.refreshHistoryBtn.addEventListener('click', () => {
-            this.loadConversionHistory();
-        });
+        }
     }
-    
-    handleFile(file) {
-        if (!this.validateFile(file)) {
+
+    handleFileDrop(e) {
+        e.preventDefault();
+        this.uploadArea.classList.remove('dragover');
+        this.uploadArea.classList.add('pulse');
+        
+        setTimeout(() => {
+            this.uploadArea.classList.remove('pulse');
+        }, 600);
+
+        const files = Array.from(e.dataTransfer.files);
+        this.processFiles(files);
+    }
+
+    handleFileSelect(e) {
+        const files = Array.from(e.target.files);
+        this.processFiles(files);
+    }
+
+    processFiles(files) {
+        this.selectedFiles = files;
+        this.displaySelectedFiles();
+        
+        if (files.length > 0) {
+            this.filesPreview.style.display = 'block';
+            this.conversionOptions.style.display = 'block';
+            this.convertSection.style.display = 'block';
+        }
+    }
+
+    displaySelectedFiles() {
+        if (this.selectedFiles.length === 0) {
+            this.filesList.innerHTML = '<p class="text-muted">No files selected</p>';
             return;
         }
-        
-        this.currentFileName = file.name;
-        this.fileName.textContent = file.name;
-        
-        this.showOptionsArea();
-        this.uploadFile(file);
-    }
-    
-    validateFile(file) {
-        const allowedExtensions = [
-            'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt',
-            'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'txt',
-            'pdf', 'rtf', 'odt', 'ods', 'odp', 'csv',
-            'html', 'htm', 'xml', 'json', 'md', 'py', 'js', 'css'
-        ];
-        
-        const fileExtension = file.name.split('.').pop().toLowerCase();
-        
-        if (!allowedExtensions.includes(fileExtension)) {
-            this.showError(`Unsupported file format: .${fileExtension}. Supported formats: DOC, DOCX, XLS, XLSX, PPT, PPTX, PNG, JPG, TXT, CSV, PDF, HTML, JSON, MD, PY, JS, CSS and more.`);
-            return false;
-        }
-        
-        const maxSize = 50 * 1024 * 1024; // 50MB
-        if (file.size > maxSize) {
-            this.showError('File is too large. Maximum size is 50MB.');
-            return false;
-        }
-        
-        return true;
-    }
-    
-    async uploadFile(file) {
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
+
+        const filesHTML = this.selectedFiles.map((file, index) => {
+            const fileSize = this.formatFileSize(file.size);
+            const fileIcon = this.getFileIcon(file.name);
             
-            this.updateProgress(25, 'Uploading file...');
+            return `
+                <div class="file-item" data-index="${index}">
+                    <div class="file-info">
+                        <div class="file-icon">
+                            <i class="${fileIcon}"></i>
+                        </div>
+                        <div class="file-details">
+                            <h6>${file.name}</h6>
+                            <div class="file-size">${fileSize}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        this.filesList.innerHTML = filesHTML;
+    }
+
+    getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const iconMap = {
+            'pdf': 'fas fa-file-pdf',
+            'doc': 'fas fa-file-word',
+            'docx': 'fas fa-file-word',
+            'xls': 'fas fa-file-excel',
+            'xlsx': 'fas fa-file-excel',
+            'ppt': 'fas fa-file-powerpoint',
+            'pptx': 'fas fa-file-powerpoint',
+            'txt': 'fas fa-file-alt',
+            'rtf': 'fas fa-file-alt',
+            'png': 'fas fa-file-image',
+            'jpg': 'fas fa-file-image',
+            'jpeg': 'fas fa-file-image',
+            'gif': 'fas fa-file-image',
+            'bmp': 'fas fa-file-image',
+            'tiff': 'fas fa-file-image'
+        };
+        return iconMap[ext] || 'fas fa-file';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async convertFiles() {
+        if (this.isConverting || this.selectedFiles.length === 0) return;
+
+        this.isConverting = true;
+        this.convertButton.disabled = true;
+        this.progressSection.style.display = 'block';
+
+        const formData = new FormData();
+        
+        // Add files
+        this.selectedFiles.forEach((file, index) => {
+            formData.append('files[]', file);
+        });
+
+        // Add options
+        formData.append('conversion_type', this.selectedType);
+        formData.append('quality', document.getElementById('qualitySelect').value);
+        formData.append('custom_name', document.getElementById('customName').value);
+
+        try {
+            // Simulate progress
+            this.updateProgress(10, 'Uploading files...');
             
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData
             });
-            
+
+            this.updateProgress(50, 'Converting files...');
+
             const result = await response.json();
             
-            if (!response.ok) {
-                throw new Error(result.error || 'Upload failed');
+            this.updateProgress(100, 'Conversion completed!');
+
+            if (result.results) {
+                this.handleConversionResults(result.results);
             }
-            
-            this.currentFileId = result.file_id;
-            this.updateProgress(100, 'File uploaded successfully! Configure options and convert.');
-            
-            // Auto-populate output name
-            if (this.currentFileName) {
-                const nameWithoutExt = this.currentFileName.replace(/\.[^/.]+$/, '');
-                this.outputNameInput.value = nameWithoutExt;
-            }
-            
+
         } catch (error) {
-            this.showError('Upload failed: ' + error.message);
-            this.resetInterface();
+            console.error('Conversion error:', error);
+            this.showError('Conversion failed. Please try again.');
+        }
+
+        setTimeout(() => {
+            this.isConverting = false;
+            this.convertButton.disabled = false;
+            this.progressSection.style.display = 'none';
+            this.loadRecentConversions();
+        }, 2000);
+    }
+
+    updateProgress(percent, text) {
+        this.progressBar.style.width = percent + '%';
+        this.progressText.textContent = text;
+    }
+
+    handleConversionResults(results) {
+        const successCount = results.filter(r => r.success).length;
+        const totalCount = results.length;
+
+        if (successCount === totalCount) {
+            this.showSuccess(`Successfully converted ${successCount} file(s)!`);
+            // Auto-download if single file
+            if (successCount === 1) {
+                const successResult = results.find(r => r.success);
+                if (successResult.download_url) {
+                    window.open(successResult.download_url, '_blank');
+                }
+            }
+        } else if (successCount > 0) {
+            this.showWarning(`Converted ${successCount} out of ${totalCount} files.`);
+        } else {
+            this.showError('All conversions failed. Please check your files and try again.');
         }
     }
-    
-    async convertFile() {
+
+    showSuccess(message) {
+        this.showNotification(message, 'success');
+    }
+
+    showError(message) {
+        this.showNotification(message, 'error');
+    }
+
+    showWarning(message) {
+        this.showNotification(message, 'warning');
+    }
+
+    showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'success'} position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    async loadRecentConversions() {
         try {
-            this.showProgressArea();
-            this.updateProgress(75, 'Converting to PDF...');
-            
-            // Ensure we have the required data
-            if (!this.currentFileId) {
-                throw new Error('No file selected for conversion');
-            }
-            
-            const requestData = {
-                file_id: this.currentFileId,
-                original_filename: this.currentFileName || '',
-                password: this.passwordInput.value || null,
-                quality: this.qualitySelect.value || 'high',
-                output_name: this.outputNameInput.value || null
-            };
-            
-            console.log('Sending conversion request:', requestData);
-            
-            const response = await fetch('/convert', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            });
-            
+            const response = await fetch('/api/recent-conversions');
             const result = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(result.error || 'Conversion failed');
-            }
-            
-            this.updateProgress(100, 'Conversion completed successfully!');
-            this.showSuccessArea();
-            this.loadConversionHistory();
-            
-        } catch (error) {
-            this.showError('Conversion failed: ' + error.message);
-            this.resetInterface();
-        }
-    }
-    
-    downloadFile() {
-        if (this.currentFileId) {
-            window.open(`/download/${this.currentFileId}`, '_blank');
-        }
-    }
-    
-    async loadConversionHistory() {
-        try {
-            const response = await fetch('/history');
-            const result = await response.json();
-            
-            if (response.ok) {
-                this.displayHistory(result.files);
-            } else {
-                throw new Error(result.error || 'Failed to load history');
+
+            if (result.success && result.conversions) {
+                this.displayRecentConversions(result.conversions);
             }
         } catch (error) {
-            console.error('History loading failed:', error);
-            this.historyList.innerHTML = '<p class="text-danger">Failed to load history.</p>';
+            console.error('Error loading recent conversions:', error);
+            this.recentConversions.innerHTML = '<p class="text-muted text-center">Unable to load recent conversions</p>';
         }
     }
-    
-    displayHistory(files) {
-        if (files.length === 0) {
-            this.historyList.innerHTML = '<p class="text-muted">No converted files yet.</p>';
+
+    displayRecentConversions(conversions) {
+        if (!conversions || conversions.length === 0) {
+            this.recentConversions.innerHTML = '<p class="text-muted text-center">No recent conversions</p>';
             return;
         }
-        
-        const recentFiles = files.slice(0, 5);
-        
-        const historyHTML = recentFiles.map(file => {
-            const date = new Date(file.created * 1000).toLocaleString();
-            const sizeKB = Math.round(file.size / 1024);
+
+        const conversionsHTML = conversions.slice(0, 5).map(conv => {
+            const date = new Date(conv.created_at).toLocaleDateString();
+            const time = new Date(conv.created_at).toLocaleTimeString();
+            const status = conv.status === 'completed' ? 'success' : 'failed';
+            const statusIcon = status === 'success' ? 'fa-check-circle text-success' : 'fa-times-circle text-danger';
+            
             return `
-                <div class="d-flex justify-content-between align-items-center border-bottom py-2 history-item">
-                    <div class="flex-grow-1">
-                        <strong>${file.filename}</strong>
-                        <br>
-                        <small class="text-muted">${date} • ${sizeKB} KB</small>
+                <div class="recent-item">
+                    <div class="recent-info">
+                        <div class="recent-icon">
+                            <i class="fas ${statusIcon}"></i>
+                        </div>
+                        <div class="recent-details">
+                            <h6>${conv.original_filename}</h6>
+                            <div class="recent-meta">
+                                ${date} at ${time} • ${this.formatFileSize(conv.file_size)}
+                            </div>
+                        </div>
                     </div>
-                    <div class="btn-group">
-                        <a href="/download/${file.filename.replace('.pdf', '')}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-download"></i>
-                        </a>
-                        <button onclick="deleteHistoryItem('${file.filename}')" class="btn btn-sm btn-outline-danger">
+                    <div class="recent-actions">
+                        ${status === 'success' ? `
+                            <a href="/download/${conv.file_id}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        ` : ''}
+                        <button class="btn btn-sm btn-outline-danger" onclick="FilyProInstance.deleteConversion('${conv.file_id}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </div>
             `;
         }).join('');
-        
-        this.historyList.innerHTML = historyHTML;
-    }
-    
-    updateProgress(percentage, text) {
-        this.progressBar.style.width = `${percentage}%`;
-        this.progressText.textContent = text;
-    }
-    
-    showOptionsArea() {
-        this.uploadArea.classList.add('d-none');
-        this.progressArea.classList.add('d-none');
-        this.optionsArea.classList.remove('d-none');
-        this.optionsArea.classList.add('fade-in');
-    }
-    
-    showProgressArea() {
-        this.uploadArea.classList.add('d-none');
-        this.optionsArea.classList.add('d-none');
-        this.progressArea.classList.remove('d-none');
-        this.progressArea.classList.add('fade-in');
-    }
-    
-    showSuccessArea() {
-        this.progressArea.classList.add('d-none');
-        this.optionsArea.classList.add('d-none');
-        this.successArea.classList.remove('d-none');
-        this.successArea.classList.add('slide-up');
-    }
-    
-    resetInterface() {
-        this.progressArea.classList.add('d-none');
-        this.optionsArea.classList.add('d-none');
-        this.successArea.classList.add('d-none');
-        this.previewContainer.classList.add('d-none');
-        
-        // Reset to conversion type selection
-        this.uploadArea.classList.add('initial-hidden');
-        document.getElementById('conversionTypeSelector').style.display = 'block';
-        document.getElementById('supportedFormatsSection').style.display = 'block';
-        document.getElementById('backButtonContainer').style.display = 'none';
-        
-        // Reset selection
-        document.querySelectorAll('.conversion-option').forEach(option => {
-            option.classList.remove('selected');
-        });
-        
-        // Reset hero subtitle
-        const heroSubtitle = document.getElementById('heroSubtitle');
-        if (heroSubtitle) {
-            heroSubtitle.textContent = 'Choose your conversion type below, then upload your files';
-        }
-        
-        this.fileInput.value = '';
-        this.batchFileInput.value = '';
-        this.passwordInput.value = '';
-        this.outputNameInput.value = '';
-        this.progressBar.style.width = '0%';
-        this.progressText.textContent = 'Uploading...';
-        
-        this.currentFileId = null;
-        this.currentFileName = null;
-        this.batchFiles = [];
-        this.selectedConversionType = null;
-        
-        this.progressArea.classList.remove('fade-in');
-        this.optionsArea.classList.remove('fade-in');
-        this.successArea.classList.remove('slide-up');
-    }
-    
-    showError(message) {
-        const errorToast = document.getElementById('errorToast');
-        const errorMessage = document.getElementById('errorMessage');
-        
-        errorMessage.textContent = message;
-        
-        const toast = new bootstrap.Toast(errorToast);
-        toast.show();
-    }
-}
 
-// Global functions
-function deleteHistoryItem(filename) {
-    if (confirm('Delete this file from history?')) {
-        fetch(`/delete/${filename}`, { method: 'DELETE' })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    window.converter.loadConversionHistory();
-                } else {
-                    alert('Failed to delete file');
-                }
-            })
-            .catch(err => {
-                console.error('Delete failed:', err);
-                alert('Failed to delete file');
+        this.recentConversions.innerHTML = conversionsHTML;
+    }
+
+    async deleteConversion(fileId) {
+        if (!confirm('Are you sure you want to delete this conversion?')) return;
+
+        try {
+            const response = await fetch(`/api/delete-conversion/${fileId}`, {
+                method: 'DELETE'
             });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.showSuccess('Conversion deleted successfully');
+                this.loadRecentConversions();
+            } else {
+                this.showError('Failed to delete conversion');
+            }
+        } catch (error) {
+            console.error('Error deleting conversion:', error);
+            this.showError('Failed to delete conversion');
+        }
     }
 }
 
-function selectConversionType(type) {
-    // Remove previous selection
-    document.querySelectorAll('.conversion-option').forEach(option => {
-        option.classList.remove('selected');
-    });
-    
-    // Add selection to clicked option
-    event.target.closest('.conversion-option').classList.add('selected');
-    
-    // Store selection
-    window.converter.selectedConversionType = type;
-    
-    // Update hero subtitle
-    const modeMessages = {
-        'pdf-to-word': 'PDF to Word conversion - Upload your PDF files below',
-        'pdf-password': 'Add Password Protection - Upload PDF files to secure them',
-        'pdf-merge': 'Merge PDFs - Upload multiple PDF files to combine',
-        'any-to-pdf': 'Convert to PDF - Upload any supported file format below'
-    };
-    
-    const heroSubtitle = document.getElementById('heroSubtitle');
-    if (heroSubtitle && modeMessages[type]) {
-        heroSubtitle.textContent = modeMessages[type];
-    }
-    
-    // Show upload area
-    setTimeout(() => {
-        window.converter.showUploadArea();
-        document.getElementById('uploadArea').scrollIntoView({ behavior: 'smooth' });
-    }, 300);
-}
-
-function showConversionMode(mode) {
-    selectConversionType(mode);
-}
-
-function goBackToSelection() {
-    window.converter.resetInterface();
-}
-
-// Initialize when DOM is loaded
+// Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.converter = new PDFConverter();
+    window.FilyProInstance = new FilyPro();
 });
+
+// Expose the class globally for onclick handlers
+window.FilyPro = FilyPro;
