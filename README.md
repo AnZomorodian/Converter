@@ -1,4 +1,278 @@
-# 🚀 Fily Pro - Professional File Converter
+# 🚀 Fily Pro - Advanced File Converter
+
+<div align="center">
+  
+![Fily Pro Logo](https://img.shields.io/badge/Fily-Pro-purple?style=for-the-badge&logo=files&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![LibreOffice](https://img.shields.io/badge/LibreOffice-0E85CD?style=for-the-badge&logo=libreoffice&logoColor=white)
+
+**A powerful, modern web application for converting files between various formats with advanced features and beautiful UI.**
+
+[🌐 Live Demo](https://your-demo-url.com) | [📚 Documentation](#) | [🛠️ Installation](#installation) | [🤝 Contributing](#contributing)
+
+</div>
+
+---
+
+## ✨ Features
+
+### 🔄 **Multi-Format Conversion**
+- **📄 Document to PDF**: Word, Excel, PowerPoint, OpenDocument formats
+- **🖼️ Image Format Converter**: Convert between PNG, JPG, WebP, BMP, TIFF, GIF, ICO, TGA, EPS
+- **📑 PDF Operations**: Merge multiple PDFs with password protection and custom ordering
+- **📸 Images to PDF**: Combine multiple images into a single PDF document
+
+### 🎨 **Modern Interface**
+- **🎯 Drag & Drop**: Intuitive file upload with visual feedback
+- **📱 Responsive Design**: Works flawlessly on desktop, tablet, and mobile
+- **🌈 Beautiful UI**: Replit-inspired black and minimal design with smooth animations
+- **⚡ Real-time Progress**: Live conversion status with animated progress bars
+
+### 🔧 **Advanced Options**
+- **⚙️ Quality Settings**: Choose conversion quality from 60% to 95%
+- **🔒 Password Protection**: Secure your PDF files with custom passwords
+- **📋 Batch Processing**: Convert multiple files simultaneously
+- **📊 Conversion History**: Track and manage recent conversions
+- **🗂️ File Ordering**: Custom file sequence for PDF merging
+
+### 🛡️ **Security & Performance**
+- **🔐 File Validation**: Comprehensive security checks
+- **📏 Size Limits**: 50MB maximum file size
+- **🧹 Auto Cleanup**: Automatic temporary file management
+- **⚡ Fast Processing**: Optimized conversion algorithms
+
+---
+
+## 🏗️ Installation
+
+### 🐍 **Local Development**
+
+```bash
+# Clone the repository
+git clone https://github.com/deepink-team/fily-pro.git
+cd fily-pro
+
+# Install dependencies (use uv or pip)
+pip install flask flask-sqlalchemy pillow pypdf2 python-docx python-pptx openpyxl pandas reportlab gunicorn
+
+# Install LibreOffice for document conversion
+# Ubuntu/Debian
+sudo apt-get install libreoffice-headless
+
+# macOS
+brew install --cask libreoffice
+
+# Run the application
+python main.py
+```
+
+### 🐳 **Docker Deployment**
+
+```bash
+# Using Docker
+docker build -t fily-pro .
+docker run -p 5000:5000 fily-pro
+
+# Using Docker Compose
+docker-compose up -d
+```
+
+### ☁️ **Cloud Deployment**
+
+#### **Replit**
+1. Import this repository to Replit
+2. Dependencies will be automatically installed
+3. Click "Run" to start the application
+
+#### **Heroku**
+```bash
+# Create Heroku app
+heroku create your-app-name
+
+# Add LibreOffice buildpack
+heroku buildpacks:add --index 1 https://github.com/ello/heroku-buildpack-libreoffice
+
+# Deploy
+git push heroku main
+```
+
+---
+
+## 🚦 Quick Start
+
+1. **🎯 Choose Conversion Type**
+   ```
+   Document to PDF → Image Converter → PDF Merge → Images to PDF
+   ```
+
+2. **📁 Upload Files**
+   - Drag & drop files into the upload area
+   - Or click "Choose Files" to browse
+
+3. **⚙️ Configure Settings**
+   - Select target format (for image conversion)
+   - Set quality level
+   - Add password protection (for PDFs)
+
+4. **🚀 Convert & Download**
+   - Click "Convert Files"
+   - Download individual files or all as ZIP
+
+---
+
+## 📊 Supported Formats
+
+<table>
+<tr>
+<td>
+
+**📄 Documents**
+- Microsoft Office (DOC, DOCX, XLS, XLSX, PPT, PPTX)
+- OpenDocument (ODT, ODS, ODP)
+- Text formats (TXT, RTF, CSV)
+
+</td>
+<td>
+
+**🖼️ Images**
+- Common formats (PNG, JPG, JPEG, GIF, BMP)
+- Advanced formats (TIFF, WebP, ICO, TGA, EPS)
+- Graphics (SVG support coming soon)
+
+</td>
+</tr>
+<tr>
+<td>
+
+**🌐 Web & Code**
+- Web formats (HTML, XML)
+- Documentation (Markdown, JSON)
+- Source code (Python, JavaScript, CSS)
+
+</td>
+<td>
+
+**📑 PDF Operations**
+- PDF merging with custom order
+- Password protection
+- Quality optimization
+- Batch processing
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🛠️ API Reference
+
+### **Core Endpoints**
+
+```http
+GET  /                     # Main application interface
+POST /upload               # File upload and conversion
+GET  /download/<file_id>   # Download converted files
+DELETE /delete/<file_id>   # Delete conversion records
+```
+
+### **Status Endpoints**
+
+```http
+GET /health               # Health check
+GET /stats               # Conversion statistics
+```
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─ Frontend (Bootstrap + Vanilla JS)
+├─ Flask Application
+│  ├─ Routes (URL handling)
+│  ├─ Converter (Format processing)
+│  ├─ Storage (File management)
+│  └─ Utils (Helper functions)
+├─ LibreOffice (Document conversion)
+└─ PIL/Pillow (Image processing)
+```
+
+---
+
+## 🤝 Contributing
+
+We love contributions! Here's how to get started:
+
+1. **🍴 Fork** the repository
+2. **🌿 Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **💻 Code** your changes
+4. **✅ Test** thoroughly
+5. **📤 Submit** a pull request
+
+### **🧪 Development Setup**
+
+```bash
+# Install development dependencies
+pip install flask flask-sqlalchemy pillow pypdf2 python-docx
+pip install pytest black flake8
+
+# Run tests
+pytest
+
+# Format code
+black .
+
+# Lint code
+flake8 .
+```
+
+---
+
+## 📈 Performance
+
+- **⚡ Fast Conversion**: Optimized algorithms for quick processing
+- **🔄 Batch Processing**: Handle multiple files efficiently
+- **💾 Memory Management**: Smart memory usage for large files
+- **🧹 Auto Cleanup**: Automatic temporary file cleanup
+
+---
+
+## 🔒 Security
+
+- **🛡️ File Validation**: Comprehensive format and content checking
+- **📏 Size Limits**: 50MB maximum file size
+- **🔐 Secure Processing**: Sandboxed conversion environment
+- **🧹 Data Privacy**: Automatic file cleanup after conversion
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🎉 Acknowledgments
+
+<div align="center">
+
+**🚀 Built with passion by [DeepInk Team](https://github.com/deepink-team)**
+
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/deepink-team)
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/deepink_team)
+
+*Special thanks to the open-source community and all contributors!*
+
+</div>
+
+---
+
+<div align="center">
+
+**⭐ Star this repo if you find it useful! ⭐**
+
+</div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-v3.11+-blue.svg)](https://www.python.org/downloads/)

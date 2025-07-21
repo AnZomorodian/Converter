@@ -19,6 +19,11 @@ def terms():
     """Terms of Service page"""
     return render_template('terms.html')
 
+@app.route('/about')
+def about():
+    """About Us page"""
+    return render_template('about.html')
+
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {
     'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
