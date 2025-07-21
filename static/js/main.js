@@ -207,18 +207,27 @@ class PDFConverter {
             this.showProgressArea();
             this.updateProgress(75, 'Converting to PDF...');
             
+            // Ensure we have the required data
+            if (!this.currentFileId) {
+                throw new Error('No file selected for conversion');
+            }
+            
+            const requestData = {
+                file_id: this.currentFileId,
+                original_filename: this.currentFileName || '',
+                password: this.passwordInput.value || null,
+                quality: this.qualitySelect.value || 'high',
+                output_name: this.outputNameInput.value || null
+            };
+            
+            console.log('Sending conversion request:', requestData);
+            
             const response = await fetch('/convert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    file_id: this.currentFileId,
-                    original_filename: this.currentFileName,
-                    password: this.passwordInput.value || null,
-                    quality: this.qualitySelect.value,
-                    output_name: this.outputNameInput.value || null
-                })
+                body: JSON.stringify(requestData)
             });
             
             const result = await response.json();
