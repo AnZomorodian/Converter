@@ -77,9 +77,12 @@ def upload_files():
                 if conversion_type == 'image-converter':
                     # Image format conversion
                     target_format = request.form.get('target_format', 'jpg')
-                    output_filename = custom_name if custom_name else f"{file_id}_converted.{target_format}"
+                    img_quality = int(request.form.get('image_quality', 95))
+                    output_filename = custom_name if custom_name else f"{file_id}_converted"
                     converted_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
-                    success = convert_image_format(original_path, converted_path, target_format, quality=95)
+                    success, final_path = convert_image_format(original_path, converted_path, target_format, quality=img_quality)
+                    if success and final_path:
+                        converted_path = final_path
                 elif conversion_type == 'merge-pdf':
                     # PDF merging - skip individual processing
                     continue
@@ -163,8 +166,27 @@ def upload_files():
             output_filename = custom_name if custom_name else f"{batch_id}_merged.pdf"
             merged_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
             
+            # Get advanced merge settings
+            file_order = request.form.get('file_order')  # Comma-separated indices
+            pdf_passwords = {}  # Dictionary for password-protected PDFs
+            
+            # Parse file order if provided
+            order_indices = None
+            if file_order:
+                try:
+                    order_indices = [int(x.strip()) for x in file_order.split(',') if x.strip().isdigit()]
+                except:
+                    order_indices = None
+            
+            # Get passwords for each file if provided
+            for i, pdf_file in enumerate(pdf_files):
+                password_key = f'pdf_password_{i}'
+                password = request.form.get(password_key)
+                if password:
+                    pdf_passwords[pdf_file['path']] = password
+            
             pdf_paths = [f['path'] for f in pdf_files]
-            success = merge_pdfs(pdf_paths, merged_path)
+            success = merge_pdfs(pdf_paths, merged_path, file_order=order_indices, passwords=pdf_passwords)
             
             if success:
                 results.append({

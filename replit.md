@@ -166,6 +166,20 @@ The application is configured for flexible deployment:
 ✓ **Enhanced Delete Feedback**: Shows file count and better error messages for delete operations
 ✓ **Improved Notifications**: Added smooth slide-in animations for all notification messages
 
+## Migration & Major Enhancements (July 21, 2025)
+### 🚀 Replit Migration Completed + Advanced Features Added
+✓ **Replit Environment Migration**: Successfully migrated from Replit Agent to standard Replit environment
+✓ **Enhanced Image Format Converter**: Now properly changes file extensions (JPG to PNG works correctly)
+✓ **Advanced PDF Merge**: Added file ordering, individual PDF password support, output password protection
+✓ **Improved Image Conversion**: Support for JPG, PNG, WebP, BMP, TIFF with quality settings
+✓ **Password-Protected PDF Support**: Can handle password-protected PDFs in merge operations
+✓ **Custom File Ordering**: Users can specify merge order (e.g., 2,1,3 to reorder files)
+✓ **Enhanced Frontend**: Advanced settings UI for both image conversion and PDF merge
+✓ **PyPDF2 Integration**: Added proper PDF manipulation library for advanced features
+✓ **Quality Controls**: Image quality settings from 60% to 95% for optimal file size vs quality
+✓ **Transparency Handling**: Proper handling of RGBA images when converting to formats without transparency
+✓ **File Extension Correction**: Output files now have correct extensions matching target format
+
 ## Major Update (July 21, 2025) - GitHub-Ready Release
 
 ### 🚀 Major Features Added

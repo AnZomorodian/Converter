@@ -490,79 +490,177 @@ def convert_code_to_pdf(input_path, output_path, quality='high'):
         return False
 
 def add_password_to_pdf(pdf_path, password):
-    """Add password protection to PDF"""
+    """Add password protection to PDF using PyPDF2"""
     try:
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import letter
-        # import PyPDF2  # Commented out as not available
+        from PyPDF2 import PdfReader, PdfWriter
+        import os
         
-        # For now, we'll skip password protection as it requires additional setup
-        # This would need pikepdf or PyPDF2 with encryption support
-        logging.info(f"Password protection requested but not implemented yet")
+        # Read the original PDF
+        reader = PdfReader(pdf_path)
+        writer = PdfWriter()
+        
+        # Add all pages to writer
+        for page_num in range(len(reader.pages)):
+            page = reader.pages[page_num]
+            writer.add_page(page)
+        
+        # Encrypt with password
+        writer.encrypt(password)
+        
+        # Create temporary file path
+        temp_path = f"{pdf_path}.temp"
+        
+        # Write encrypted PDF to temp file
+        with open(temp_path, 'wb') as output_file:
+            writer.write(output_file)
+        
+        # Replace original with encrypted version
+        os.replace(temp_path, pdf_path)
+        
+        logging.info(f"Successfully added password protection to PDF")
         return True
     
     except Exception as e:
         logging.error(f"Password protection error: {str(e)}")
-        return True  # Return True to not fail the conversion
+        return False
 
 def convert_image_format(input_path, output_path, target_format='jpg', quality=95):
     """
-    Convert between different image formats
+    Convert between different image formats - IMPROVED VERSION
     """
     try:
         from PIL import Image
+        import os
         
-        # Open the image
+        # Ensure output path has correct extension
+        output_dir = os.path.dirname(output_path)
+        output_name = os.path.splitext(os.path.basename(output_path))[0]
+        
+        # Set correct file extension based on target format
+        if target_format.lower() in ['jpg', 'jpeg']:
+            output_path = os.path.join(output_dir, f"{output_name}.jpg")
+        elif target_format.lower() == 'png':
+            output_path = os.path.join(output_dir, f"{output_name}.png")
+        elif target_format.lower() == 'webp':
+            output_path = os.path.join(output_dir, f"{output_name}.webp")
+        elif target_format.lower() == 'bmp':
+            output_path = os.path.join(output_dir, f"{output_name}.bmp")
+        elif target_format.lower() in ['tiff', 'tif']:
+            output_path = os.path.join(output_dir, f"{output_name}.tiff")
+        else:
+            logging.error(f"Unsupported target format: {target_format}")
+            return False, None
+        
+        # Open and convert the image
         with Image.open(input_path) as img:
-            # Convert RGBA to RGB if necessary for JPEG
-            if target_format.lower() in ['jpg', 'jpeg'] and img.mode in ['RGBA', 'LA']:
-                # Create a white background
+            # Handle transparency for formats that don't support it
+            if target_format.lower() in ['jpg', 'jpeg', 'bmp'] and img.mode in ['RGBA', 'LA', 'P']:
+                # Create a white background for formats that don't support transparency
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
                 background = Image.new('RGB', img.size, (255, 255, 255))
-                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                if img.mode == 'RGBA':
+                    background.paste(img, mask=img.split()[-1])
+                else:
+                    background.paste(img)
                 img = background
             
-            # Save in target format
+            # Convert to appropriate mode for target format
+            elif target_format.lower() == 'png' and img.mode not in ['RGBA', 'RGB', 'L', 'LA']:
+                img = img.convert('RGBA')
+            elif target_format.lower() in ['jpg', 'jpeg'] and img.mode not in ['RGB', 'L']:
+                img = img.convert('RGB')
+            
+            # Save in target format with appropriate settings
             if target_format.lower() in ['jpg', 'jpeg']:
-                img.save(output_path, 'JPEG', quality=quality, optimize=True)
+                img.save(output_path, 'JPEG', quality=quality, optimize=True, progressive=True)
             elif target_format.lower() == 'png':
-                img.save(output_path, 'PNG', optimize=True)
+                img.save(output_path, 'PNG', optimize=True, compress_level=6)
             elif target_format.lower() == 'webp':
-                img.save(output_path, 'WEBP', quality=quality, optimize=True)
+                img.save(output_path, 'WEBP', quality=quality, optimize=True, method=6)
             elif target_format.lower() == 'bmp':
                 img.save(output_path, 'BMP')
-            elif target_format.lower() == 'tiff':
-                img.save(output_path, 'TIFF', quality=quality)
-            else:
-                logging.error(f"Unsupported target format: {target_format}")
-                return False
+            elif target_format.lower() in ['tiff', 'tif']:
+                img.save(output_path, 'TIFF', quality=quality, compression='lzw')
             
-        logging.info(f"Successfully converted image to {target_format.upper()}")
-        return True
+        logging.info(f"Successfully converted image to {target_format.upper()} format: {output_path}")
+        return True, output_path
         
     except Exception as e:
         logging.error(f"Image format conversion error: {str(e)}")
-        return False
+        return False, None
 
-def merge_pdfs(input_paths, output_path):
+def merge_pdfs(input_paths, output_path, file_order=None, passwords=None):
     """
-    Merge multiple PDF files into one
+    Merge multiple PDF files into one with advanced settings
+    Args:
+        input_paths: List of PDF file paths
+        output_path: Output merged PDF path
+        file_order: Optional list of indices to specify order (0-based)
+        passwords: Optional dict of {file_path: password} for protected PDFs
     """
     try:
-        from PyPDF2 import PdfMerger
+        from PyPDF2 import PdfReader, PdfWriter
+        import PyPDF2
         
-        merger = PdfMerger()
+        writer = PdfWriter()
+        processed_files = []
         
-        for path in input_paths:
-            if os.path.exists(path):
-                merger.append(path)
-            else:
+        # Use custom order if specified, otherwise use original order
+        if file_order:
+            # Reorder input_paths based on file_order indices
+            try:
+                ordered_paths = [input_paths[i] for i in file_order if i < len(input_paths)]
+                input_paths = ordered_paths
+            except (IndexError, TypeError):
+                logging.warning("Invalid file order specified, using original order")
+        
+        for i, path in enumerate(input_paths):
+            if not os.path.exists(path):
                 logging.warning(f"PDF file not found: {path}")
+                continue
+                
+            try:
+                # Get password for this file if provided
+                password = passwords.get(path) if passwords else None
+                
+                # Try to open the PDF
+                reader = PdfReader(path)
+                
+                # Handle password-protected PDFs
+                if reader.is_encrypted:
+                    if password:
+                        try:
+                            reader.decrypt(password)
+                            logging.info(f"Successfully decrypted PDF: {os.path.basename(path)}")
+                        except Exception as e:
+                            logging.error(f"Failed to decrypt PDF {path} with provided password: {str(e)}")
+                            continue
+                    else:
+                        logging.warning(f"PDF {path} is password-protected but no password provided")
+                        continue
+                
+                # Add all pages from this PDF
+                for page_num in range(len(reader.pages)):
+                    page = reader.pages[page_num]
+                    writer.add_page(page)
+                
+                processed_files.append(os.path.basename(path))
+                logging.info(f"Added {len(reader.pages)} pages from {os.path.basename(path)}")
+                
+            except Exception as e:
+                logging.error(f"Error processing PDF {path}: {str(e)}")
+                continue
         
+        if not processed_files:
+            logging.error("No valid PDF files were processed")
+            return False
+        
+        # Write the merged PDF
         with open(output_path, 'wb') as output_file:
-            merger.write(output_file)
+            writer.write(output_file)
         
-        merger.close()
-        logging.info(f"Successfully merged {len(input_paths)} PDFs")
+        logging.info(f"Successfully merged {len(processed_files)} PDFs: {', '.join(processed_files)}")
         return True
         
     except Exception as e:

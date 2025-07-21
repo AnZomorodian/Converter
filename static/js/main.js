@@ -84,6 +84,7 @@ class FilyPro {
     showConversionTypeOptions() {
         // Hide all specific options first
         document.getElementById('imageFormatOptions').style.display = 'none';
+        document.getElementById('pdfMergeOptions').style.display = 'none';
         document.getElementById('mergeInstructions').style.display = 'none';
         document.getElementById('imagesToPdfInstructions').style.display = 'none';
 
@@ -94,6 +95,7 @@ class FilyPro {
             fileInput.accept = '.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp';
         } else if (this.selectedType === 'merge-pdf') {
             document.getElementById('mergeInstructions').style.display = 'block';
+            document.getElementById('pdfMergeOptions').style.display = 'block';
             fileInput.accept = '.pdf';
         } else if (this.selectedType === 'images-to-pdf') {
             document.getElementById('imagesToPdfInstructions').style.display = 'block';
@@ -181,7 +183,7 @@ class FilyPro {
                             <i class="${fileIcon}"></i>
                         </div>
                         <div class="file-details">
-                            <h6>${file.name}</h6>
+                            <h6>${index + 1}. ${file.name}</h6>
                             <div class="file-size">${fileSize}</div>
                         </div>
                     </div>
@@ -190,6 +192,40 @@ class FilyPro {
         }).join('');
 
         this.filesList.innerHTML = filesHTML;
+        
+        // Show PDF password inputs for merge-pdf conversion type
+        this.updatePdfPasswordInputs();
+    }
+    
+    updatePdfPasswordInputs() {
+        const pdfPasswordsSection = document.getElementById('pdfPasswordsSection');
+        const pdfPasswordInputs = document.getElementById('pdfPasswordInputs');
+        
+        if (this.selectedType === 'merge-pdf' && this.selectedFiles.length > 0) {
+            const pdfFiles = this.selectedFiles.filter(file => file.name.toLowerCase().endsWith('.pdf'));
+            
+            if (pdfFiles.length > 0) {
+                pdfPasswordsSection.style.display = 'block';
+                
+                const passwordInputsHTML = pdfFiles.map((file, index) => {
+                    return `
+                        <div class="mb-2">
+                            <div class="input-group">
+                                <span class="input-group-text">${index + 1}.</span>
+                                <input type="password" class="form-control" id="pdf_password_${index}" 
+                                       placeholder="Password for ${file.name}" autocomplete="new-password">
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                pdfPasswordInputs.innerHTML = passwordInputsHTML;
+            } else {
+                pdfPasswordsSection.style.display = 'none';
+            }
+        } else {
+            pdfPasswordsSection.style.display = 'none';
+        }
     }
 
     getFileIcon(filename) {
@@ -240,6 +276,35 @@ class FilyPro {
         formData.append('conversion_type', this.selectedType);
         formData.append('quality', document.getElementById('qualitySelect').value);
         formData.append('custom_name', document.getElementById('customName').value);
+        
+        // Add image format conversion options
+        if (this.selectedType === 'image-converter') {
+            formData.append('target_format', document.getElementById('targetFormat').value);
+            formData.append('image_quality', document.getElementById('imageQuality').value);
+        }
+        
+        // Add PDF merge advanced options
+        if (this.selectedType === 'merge-pdf') {
+            const fileOrder = document.getElementById('fileOrder').value;
+            if (fileOrder.trim()) {
+                // Convert to 0-based indices for backend
+                const indices = fileOrder.split(',').map(i => parseInt(i.trim()) - 1).filter(i => i >= 0);
+                formData.append('file_order', indices.join(','));
+            }
+            
+            const outputPassword = document.getElementById('outputPassword').value;
+            if (outputPassword.trim()) {
+                formData.append('password', outputPassword);
+            }
+            
+            // Add individual PDF passwords
+            this.selectedFiles.forEach((file, index) => {
+                const passwordInput = document.getElementById(`pdf_password_${index}`);
+                if (passwordInput && passwordInput.value.trim()) {
+                    formData.append(`pdf_password_${index}`, passwordInput.value);
+                }
+            });
+        }
 
         try {
             // Simulate progress
