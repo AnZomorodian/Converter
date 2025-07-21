@@ -101,5 +101,22 @@ class LocalStorage:
         
         self._save_json(self.stats_file, stats)
 
+    def delete_conversion(self, file_id):
+        """Delete a conversion record from storage"""
+        try:
+            conversions = self._load_json(self.conversions_file)
+            # Filter out the conversion with matching file_id
+            updated_conversions = [conv for conv in conversions if conv.get('file_id') != file_id]
+            
+            # Save updated list
+            self._save_json(self.conversions_file, updated_conversions)
+            
+            logging.info(f"Deleted conversion record for file_id: {file_id}")
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error deleting conversion record {file_id}: {str(e)}")
+            return False
+
 # Global storage instance
 storage = LocalStorage()

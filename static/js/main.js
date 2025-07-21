@@ -314,7 +314,7 @@ class FilyPro {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'success'} position-fixed`;
-        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; transform: translateX(100%); transition: transform 0.3s ease;';
         notification.innerHTML = `
             <div class="d-flex align-items-center">
                 <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
@@ -331,6 +331,11 @@ class FilyPro {
                 notification.remove();
             }
         }, 5000);
+        
+        // Add a subtle animation when notification appears
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 10);
     }
 
     async loadRecentConversions() {
@@ -392,6 +397,13 @@ class FilyPro {
     async deleteConversion(fileId) {
         if (!confirm('Are you sure you want to delete this conversion?')) return;
 
+        // Show loading state
+        const deleteButton = document.querySelector(`button[onclick*="${fileId}"]`);
+        if (deleteButton) {
+            deleteButton.disabled = true;
+            deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+
         try {
             const response = await fetch(`/api/delete-conversion/${fileId}`, {
                 method: 'DELETE'
@@ -400,14 +412,25 @@ class FilyPro {
             const result = await response.json();
             
             if (result.success) {
-                this.showSuccess('Conversion deleted successfully');
-                this.loadRecentConversions();
+                this.showSuccess('File deleted successfully');
+                // Reload the recent conversions list
+                await this.loadRecentConversions();
             } else {
-                this.showError('Failed to delete conversion');
+                this.showError(result.error || 'Failed to delete file');
+                // Reset button state
+                if (deleteButton) {
+                    deleteButton.disabled = false;
+                    deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                }
             }
         } catch (error) {
             console.error('Error deleting conversion:', error);
-            this.showError('Failed to delete conversion');
+            this.showError('Failed to delete file');
+            // Reset button state
+            if (deleteButton) {
+                deleteButton.disabled = false;
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+            }
         }
     }
 }

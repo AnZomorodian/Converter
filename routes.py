@@ -311,24 +311,33 @@ def get_supported_formats():
 def delete_conversion(file_id):
     """Delete a conversion record and associated files"""
     try:
-        # Remove files
+        files_deleted = 0
+        
+        # Remove files from both folders
         for folder in [app.config['UPLOAD_FOLDER'], app.config['CONVERTED_FOLDER']]:
-            for filename in os.listdir(folder):
-                if filename.startswith(file_id):
-                    file_path = os.path.join(folder, filename)
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
+            if os.path.exists(folder):
+                for filename in os.listdir(folder):
+                    if filename.startswith(file_id):
+                        file_path = os.path.join(folder, filename)
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                            files_deleted += 1
+                            logging.info(f"Deleted file: {file_path}")
+        
+        # Remove from storage records
+        storage.delete_conversion(file_id)
         
         return jsonify({
             'success': True,
-            'message': 'File deleted successfully'
+            'message': f'Successfully deleted {files_deleted} file(s)',
+            'files_deleted': files_deleted
         })
         
     except Exception as e:
         logging.error(f"Error deleting conversion {file_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Failed to delete file'
+            'error': f'Failed to delete file: {str(e)}'
         }), 500
 
 # Error handlers
