@@ -14,6 +14,7 @@ class PDFConverter {
         this.startConversionBtn = document.getElementById('startConversionBtn');
         this.qualitySelect = document.getElementById('qualitySelect');
         this.passwordInput = document.getElementById('passwordInput');
+        this.outputNameInput = document.getElementById('outputNameInput');
         this.uploadCard = document.getElementById('uploadCard');
         this.refreshHistoryBtn = document.getElementById('refreshHistoryBtn');
         this.historyList = document.getElementById('historyList');
@@ -47,23 +48,38 @@ class PDFConverter {
             }
         });
         
-        // Drag and drop events
+        // Enhanced drag and drop events
         this.uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            this.uploadArea.classList.add('dragover');
+        });
+        
+        this.uploadArea.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             this.uploadArea.classList.add('dragover');
         });
         
         this.uploadArea.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            this.uploadArea.classList.remove('dragover');
+            e.stopPropagation();
+            // Only remove dragover if we're leaving the upload area entirely
+            if (!this.uploadArea.contains(e.relatedTarget)) {
+                this.uploadArea.classList.remove('dragover');
+            }
         });
         
         this.uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             this.uploadArea.classList.remove('dragover');
             
-            if (e.dataTransfer.files.length > 0) {
-                this.handleFile(e.dataTransfer.files[0]);
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length > 1) {
+                this.handleBatchFiles(files);
+            } else if (files.length === 1) {
+                this.handleFile(files[0]);
             }
         });
         
@@ -134,13 +150,14 @@ class PDFConverter {
         const allowedExtensions = [
             'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt',
             'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'txt',
-            'csv', 'pdf', 'rtf', 'odt', 'ods', 'odp'
+            'csv', 'pdf', 'rtf', 'odt', 'ods', 'odp',
+            'html', 'htm', 'xml', 'json', 'md', 'py', 'js', 'css'
         ];
         
         const fileExtension = file.name.split('.').pop().toLowerCase();
         
         if (!allowedExtensions.includes(fileExtension)) {
-            this.showError('Unsupported file format. Please select a Word, Excel, PowerPoint, image, or text file.');
+            this.showError(`Unsupported file format: .${fileExtension}. Supported formats: DOC, DOCX, XLS, XLSX, PPT, PPTX, PNG, JPG, TXT, CSV, PDF, HTML, JSON, MD, PY, JS, CSS and more.`);
             return false;
         }
         
@@ -175,6 +192,12 @@ class PDFConverter {
             this.currentFileId = result.file_id;
             this.updateProgress(100, 'File uploaded successfully! Configure options and convert.');
             
+            // Auto-populate output name with original filename
+            if (this.currentFileName) {
+                const nameWithoutExt = this.currentFileName.replace(/\.[^/.]+$/, '');
+                this.outputNameInput.value = nameWithoutExt;
+            }
+            
             // Show options instead of auto-converting
             this.showOptionsArea();
             
@@ -198,7 +221,8 @@ class PDFConverter {
                     file_id: this.currentFileId,
                     original_filename: this.currentFileName,
                     password: this.passwordInput.value || null,
-                    quality: this.qualitySelect.value
+                    quality: this.qualitySelect.value,
+                    output_name: this.outputNameInput.value || null
                 })
             });
             
@@ -404,6 +428,7 @@ class PDFConverter {
         this.fileInput.value = '';
         this.batchFileInput.value = '';
         this.passwordInput.value = '';
+        this.outputNameInput.value = '';
         this.progressBar.style.width = '0%';
         this.progressText.textContent = 'Uploading...';
         

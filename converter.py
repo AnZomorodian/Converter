@@ -24,6 +24,16 @@ def convert_to_pdf(input_path, output_path, original_filename, password=None, qu
             success = convert_csv_to_pdf(input_path, output_path, quality)
         elif file_extension in ['.rtf', '.odt', '.ods', '.odp']:
             success = convert_office_format_to_pdf(input_path, output_path, quality)
+        elif file_extension in ['.html', '.htm']:
+            success = convert_html_to_pdf(input_path, output_path, quality)
+        elif file_extension == '.xml':
+            success = convert_xml_to_pdf(input_path, output_path, quality)
+        elif file_extension == '.json':
+            success = convert_json_to_pdf(input_path, output_path, quality)
+        elif file_extension == '.md':
+            success = convert_markdown_to_pdf(input_path, output_path, quality)
+        elif file_extension in ['.py', '.js', '.css']:
+            success = convert_code_to_pdf(input_path, output_path, quality)
         elif file_extension == '.pdf':
             # If already PDF, just copy and optionally add password
             import shutil
@@ -310,6 +320,173 @@ def convert_office_format_to_pdf(input_path, output_path, quality='high'):
     
     except Exception as e:
         logging.error(f"Office format conversion error: {str(e)}")
+        return False
+
+def convert_html_to_pdf(input_path, output_path, quality='high'):
+    """Convert HTML files to PDF"""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        import html
+        
+        # Read HTML file
+        with open(input_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Simple HTML to text conversion (basic)
+        content = html.unescape(content)
+        # Remove HTML tags (basic approach)
+        import re
+        content = re.sub('<[^<]+?>', '', content)
+        
+        # Create PDF
+        pdf_doc = SimpleDocTemplate(output_path, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Split content into paragraphs
+        paragraphs = content.split('\n\n')
+        for para in paragraphs:
+            if para.strip():
+                p = Paragraph(para.replace('\n', '<br/>'), styles['Normal'])
+                story.append(p)
+                story.append(Spacer(1, 12))
+        
+        pdf_doc.build(story)
+        return True
+    
+    except Exception as e:
+        logging.error(f"HTML conversion error: {str(e)}")
+        return False
+
+def convert_xml_to_pdf(input_path, output_path, quality='high'):
+    """Convert XML files to PDF"""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
+        from reportlab.lib.styles import getSampleStyleSheet
+        
+        # Read XML file
+        with open(input_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Create PDF
+        pdf_doc = SimpleDocTemplate(output_path, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Add XML content as preformatted text
+        pre = Preformatted(content, styles['Code'])
+        story.append(pre)
+        
+        pdf_doc.build(story)
+        return True
+    
+    except Exception as e:
+        logging.error(f"XML conversion error: {str(e)}")
+        return False
+
+def convert_json_to_pdf(input_path, output_path, quality='high'):
+    """Convert JSON files to PDF"""
+    try:
+        import json
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
+        from reportlab.lib.styles import getSampleStyleSheet
+        
+        # Read and format JSON file
+        with open(input_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        formatted_json = json.dumps(data, indent=2, ensure_ascii=False)
+        
+        # Create PDF
+        pdf_doc = SimpleDocTemplate(output_path, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Add formatted JSON as preformatted text
+        pre = Preformatted(formatted_json, styles['Code'])
+        story.append(pre)
+        
+        pdf_doc.build(story)
+        return True
+    
+    except Exception as e:
+        logging.error(f"JSON conversion error: {str(e)}")
+        return False
+
+def convert_markdown_to_pdf(input_path, output_path, quality='high'):
+    """Convert Markdown files to PDF"""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        import re
+        
+        # Read Markdown file
+        with open(input_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Basic markdown to text conversion
+        # Remove markdown syntax (basic approach)
+        content = re.sub(r'#+\s*', '', content)  # Headers
+        content = re.sub(r'\*\*(.*?)\*\*', r'\1', content)  # Bold
+        content = re.sub(r'\*(.*?)\*', r'\1', content)  # Italic
+        content = re.sub(r'`(.*?)`', r'\1', content)  # Code
+        
+        # Create PDF
+        pdf_doc = SimpleDocTemplate(output_path, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Split content into paragraphs
+        paragraphs = content.split('\n\n')
+        for para in paragraphs:
+            if para.strip():
+                p = Paragraph(para.replace('\n', '<br/>'), styles['Normal'])
+                story.append(p)
+                story.append(Spacer(1, 12))
+        
+        pdf_doc.build(story)
+        return True
+    
+    except Exception as e:
+        logging.error(f"Markdown conversion error: {str(e)}")
+        return False
+
+def convert_code_to_pdf(input_path, output_path, quality='high'):
+    """Convert code files (Python, JavaScript, CSS) to PDF"""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Preformatted, Spacer, Paragraph
+        from reportlab.lib.styles import getSampleStyleSheet
+        
+        # Read code file
+        with open(input_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Create PDF
+        pdf_doc = SimpleDocTemplate(output_path, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Add filename as header
+        file_extension = Path(input_path).suffix.upper()
+        header = Paragraph(f"{file_extension[1:]} Code File", styles['Heading1'])
+        story.append(header)
+        story.append(Spacer(1, 20))
+        
+        # Add code content as preformatted text
+        pre = Preformatted(content, styles['Code'])
+        story.append(pre)
+        
+        pdf_doc.build(story)
+        return True
+    
+    except Exception as e:
+        logging.error(f"Code conversion error: {str(e)}")
         return False
 
 def add_password_to_pdf(pdf_path, password):

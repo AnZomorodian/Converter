@@ -10,7 +10,8 @@ import logging
 ALLOWED_EXTENSIONS = {
     'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 
     'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'txt',
-    'pdf', 'rtf', 'odt', 'ods', 'odp', 'csv'
+    'pdf', 'rtf', 'odt', 'ods', 'odp', 'csv',
+    'html', 'htm', 'xml', 'json', 'md', 'py', 'js', 'css'
 }
 
 def allowed_file(filename):
@@ -133,9 +134,16 @@ def convert_file():
         # Get conversion options
         password = data.get('password', None)
         quality = data.get('quality', 'high')
+        output_name = data.get('output_name', None)
         
         # Convert to PDF
-        pdf_filename = f"{file_id}.pdf"
+        if output_name:
+            # Ensure PDF extension
+            if not output_name.lower().endswith('.pdf'):
+                output_name += '.pdf'
+            pdf_filename = f"{file_id}_{secure_filename(output_name)}"
+        else:
+            pdf_filename = f"{file_id}.pdf"
         pdf_path = os.path.join(current_app.config['CONVERTED_FOLDER'], pdf_filename)
         
         success = convert_to_pdf(upload_path, pdf_path, original_filename, password=password, quality=quality)

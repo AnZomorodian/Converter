@@ -95,10 +95,13 @@ The application is configured for flexible deployment:
 
 ✓ Fixed file upload bug with missing extensions that caused "list index out of range" error
 ✓ Added batch file upload and conversion capability
-✓ Enhanced supported file formats (CSV, PDF, RTF, ODT, ODS, ODP)
-✓ Implemented conversion options (quality settings, password protection framework)
+✓ Enhanced supported file formats (CSV, PDF, RTF, ODT, ODS, ODP, HTML, XML, JSON, MD, PY, JS, CSS)
+✓ Implemented conversion options (quality settings, password protection framework, custom output names)
 ✓ Added file preview functionality for images and text files
 ✓ Created conversion history tracking and display
 ✓ Improved error handling and validation
 ✓ Enhanced UI with options area and better progress tracking
+✓ Added transparent footer with Fily branding, DeepInk Team credit, GitHub/Telegram icons
+✓ Improved drag & drop area with animated pulse effect and format badges
+✓ Enhanced drag & drop functionality to handle single and multiple files properly
 ✓ Added system dependency installation for LibreOffice
