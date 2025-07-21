@@ -553,23 +553,80 @@ def convert_image_format(input_path, output_path, target_format='jpg', quality=9
         
         # Open and convert the image
         with Image.open(input_path) as img:
-            # Handle transparency for formats that don't support it
-            if target_format.lower() in ['jpg', 'jpeg', 'bmp'] and img.mode in ['RGBA', 'LA', 'P']:
-                # Create a white background for formats that don't support transparency
-                if img.mode == 'P':
-                    img = img.convert('RGBA')
-                background = Image.new('RGB', img.size, (255, 255, 255))
-                if img.mode == 'RGBA':
-                    background.paste(img, mask=img.split()[-1])
-                else:
-                    background.paste(img)
-                img = background
+            # Log original format and mode for debugging
+            logging.info(f"Converting from {img.format} ({img.mode}) to {target_format.upper()}")
             
-            # Convert to appropriate mode for target format
-            elif target_format.lower() == 'png' and img.mode not in ['RGBA', 'RGB', 'L', 'LA']:
-                img = img.convert('RGBA')
-            elif target_format.lower() in ['jpg', 'jpeg'] and img.mode not in ['RGB', 'L']:
-                img = img.convert('RGB')
+            # Handle transparency and mode conversion based on target format
+            if target_format.lower() in ['jpg', 'jpeg']:
+                # JPEG doesn't support transparency - convert to RGB with white background
+                if img.mode in ['RGBA', 'LA', 'P']:
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    if img.mode == 'RGBA':
+                        background.paste(img, mask=img.split()[-1])
+                    else:
+                        background.paste(img)
+                    img = background
+                elif img.mode not in ['RGB', 'L']:
+                    img = img.convert('RGB')
+                    
+            elif target_format.lower() == 'png':
+                # PNG supports all modes, prefer RGBA for transparency
+                if img.mode not in ['RGBA', 'RGB', 'L', 'LA', 'P']:
+                    img = img.convert('RGBA')
+                    
+            elif target_format.lower() == 'bmp':
+                # BMP doesn't support transparency - convert to RGB
+                if img.mode in ['RGBA', 'LA', 'P']:
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    if img.mode == 'RGBA':
+                        background.paste(img, mask=img.split()[-1])
+                    else:
+                        background.paste(img)
+                    img = background
+                elif img.mode not in ['RGB', 'L']:
+                    img = img.convert('RGB')
+                    
+            elif target_format.lower() in ['tiff', 'tif']:
+                # TIFF supports most modes including RGBA
+                if img.mode not in ['RGBA', 'RGB', 'L', 'LA', 'CMYK']:
+                    img = img.convert('RGBA')
+                    
+            elif target_format.lower() == 'webp':
+                # WebP supports RGBA and RGB
+                if img.mode not in ['RGBA', 'RGB']:
+                    img = img.convert('RGBA' if 'transparency' in img.info or img.mode in ['RGBA', 'LA'] else 'RGB')
+                    
+            elif target_format.lower() == 'gif':
+                # GIF requires P mode (palette) or L mode
+                if img.mode not in ['P', 'L']:
+                    # Convert to P mode for GIF with optimized palette
+                    img = img.convert('P')
+                    
+            elif target_format.lower() == 'ico':
+                # ICO typically uses RGBA
+                if img.mode != 'RGBA':
+                    img = img.convert('RGBA')
+                    
+            elif target_format.lower() in ['eps', 'pdf']:
+                # EPS and PDF require RGB mode
+                if img.mode != 'RGB':
+                    if img.mode in ['RGBA', 'LA']:
+                        background = Image.new('RGB', img.size, (255, 255, 255))
+                        if img.mode == 'RGBA':
+                            background.paste(img, mask=img.split()[-1])
+                        else:
+                            background.paste(img)
+                        img = background
+                    else:
+                        img = img.convert('RGB')
+            else:
+                # For other formats, try to preserve the original mode or convert to RGB
+                if img.mode not in ['RGB', 'RGBA', 'L', 'LA']:
+                    img = img.convert('RGB')
             
             # Save in target format with appropriate settings
             if target_format.lower() in ['jpg', 'jpeg']:
@@ -579,9 +636,40 @@ def convert_image_format(input_path, output_path, target_format='jpg', quality=9
             elif target_format.lower() == 'webp':
                 img.save(output_path, 'WEBP', quality=quality, optimize=True, method=6)
             elif target_format.lower() == 'bmp':
+                # BMP doesn't support quality or compression settings
                 img.save(output_path, 'BMP')
             elif target_format.lower() in ['tiff', 'tif']:
-                img.save(output_path, 'TIFF', quality=quality, compression='lzw')
+                # TIFF compression without quality setting for compatibility
+                img.save(output_path, 'TIFF', compression='lzw')
+            elif target_format.lower() == 'gif':
+                # Convert to P mode for GIF and handle transparency
+                if img.mode not in ['P', 'L']:
+                    img = img.convert('P')
+                img.save(output_path, 'GIF', optimize=True)
+            elif target_format.lower() == 'ico':
+                # ICO format for icons
+                img.save(output_path, 'ICO')
+            elif target_format.lower() == 'tga':
+                # TGA format
+                img.save(output_path, 'TGA')
+            elif target_format.lower() in ['jp2', 'jpeg2000']:
+                # JPEG 2000 format (simplified saving)
+                try:
+                    img.save(output_path, 'JPEG2000')
+                except Exception:
+                    # Fallback to JPEG if JPEG2000 not supported
+                    output_path = output_path.rsplit('.', 1)[0] + '.jpg'
+                    img.save(output_path, 'JPEG', quality=quality)
+            elif target_format.lower() == 'eps':
+                # EPS format (PostScript) - convert to RGB first
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                img.save(output_path, 'EPS')
+            elif target_format.lower() == 'pdf':
+                # PDF format - ensure RGB mode
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                img.save(output_path, 'PDF', resolution=100.0)
             
         logging.info(f"Successfully converted image to {target_format.upper()} format: {output_path}")
         return True, output_path

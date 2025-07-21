@@ -92,7 +92,7 @@ class FilyPro {
         const fileInput = document.getElementById('fileInput');
         if (this.selectedType === 'image-converter') {
             document.getElementById('imageFormatOptions').style.display = 'block';
-            fileInput.accept = '.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp';
+            fileInput.accept = '.png,.jpg,.jpeg,.gif,.bmp,.tiff,.tif,.webp,.ico,.tga,.jp2,.jpeg2000,.eps,.svg,.psd';
         } else if (this.selectedType === 'merge-pdf') {
             document.getElementById('mergeInstructions').style.display = 'block';
             document.getElementById('pdfMergeOptions').style.display = 'block';
@@ -245,7 +245,16 @@ class FilyPro {
             'jpeg': 'fas fa-file-image',
             'gif': 'fas fa-file-image',
             'bmp': 'fas fa-file-image',
-            'tiff': 'fas fa-file-image'
+            'tiff': 'fas fa-file-image',
+            'tif': 'fas fa-file-image',
+            'webp': 'fas fa-file-image',
+            'ico': 'fas fa-file-image',
+            'tga': 'fas fa-file-image',
+            'jp2': 'fas fa-file-image',
+            'jpeg2000': 'fas fa-file-image',
+            'eps': 'fas fa-file-image',
+            'svg': 'fas fa-file-image',
+            'psd': 'fas fa-file-image'
         };
         return iconMap[ext] || 'fas fa-file';
     }

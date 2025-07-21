@@ -23,7 +23,8 @@ def terms():
 ALLOWED_EXTENSIONS = {
     'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
     'txt', 'rtf', 'odt', 'ods', 'odp', 'csv',
-    'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff',
+    'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'tif', 'webp', 
+    'ico', 'tga', 'jp2', 'jpeg2000', 'eps', 'svg', 'psd',
     'md', 'html', 'pdf'
 }
 
