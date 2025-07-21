@@ -68,9 +68,9 @@ def get_stats():
             
             # Get popular formats
             popular_formats = db.session.query(
-                ConversionHistory.file_format,
+                ConversionHistory.file_extension,
                 func.count(ConversionHistory.id).label('count')
-            ).group_by(ConversionHistory.file_format).order_by(
+            ).group_by(ConversionHistory.file_extension).order_by(
                 func.count(ConversionHistory.id).desc()
             ).limit(5).all()
             
@@ -106,7 +106,7 @@ def system_health():
         # Check database connection
         db_status = "healthy"
         try:
-            db.session.execute("SELECT 1")
+            db.session.execute(db.text("SELECT 1"))
         except Exception:
             db_status = "unhealthy"
         
@@ -166,7 +166,10 @@ def cleanup_files():
     """Clean up old files"""
     try:
         # Clean files older than 24 hours
-        cleanup_old_files(hours=24)
+        from utils import cleanup_old_files
+        cleanup_old_files('uploads', max_age_hours=24)
+        cleanup_old_files('converted', max_age_hours=24)
+        cleanup_old_files('temp', max_age_hours=24)
         return jsonify({
             "success": True,
             "message": "فایل‌های قدیمی پاک شدند"
@@ -205,7 +208,7 @@ def not_found(error):
             "error": "API endpoint not found",
             "code": 404
         }), 404
-    return render_template('errors/404.html'), 404
+    return render_template('404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -215,4 +218,4 @@ def internal_error(error):
             "error": "Internal server error",
             "code": 500
         }), 500
-    return render_template('errors/500.html'), 500
+    return render_template('500.html'), 500
