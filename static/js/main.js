@@ -3,6 +3,8 @@ class PDFConverter {
         this.initializeElements();
         this.attachEventListeners();
         this.loadConversionHistory();
+        this.selectedConversionType = null;
+        this.hideUploadAreaInitially();
     }
     
     initializeElements() {
@@ -43,6 +45,16 @@ class PDFConverter {
         this.currentFileId = null;
         this.currentFileName = null;
         this.batchFiles = [];
+        this.selectedConversionType = null;
+    }
+    
+    hideUploadAreaInitially() {
+        this.uploadArea.classList.add('initial-hidden');
+    }
+    
+    showUploadArea() {
+        this.uploadArea.classList.remove('initial-hidden', 'd-none');
+        document.getElementById('conversionTypeSelector').style.display = 'none';
     }
     
     attachEventListeners() {
@@ -310,7 +322,20 @@ class PDFConverter {
         this.successArea.classList.add('d-none');
         this.previewContainer.classList.add('d-none');
         
-        this.uploadArea.classList.remove('d-none');
+        // Reset to conversion type selection
+        this.uploadArea.classList.add('initial-hidden');
+        document.getElementById('conversionTypeSelector').style.display = 'block';
+        
+        // Reset selection
+        document.querySelectorAll('.conversion-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        // Reset hero subtitle
+        const heroSubtitle = document.getElementById('heroSubtitle');
+        if (heroSubtitle) {
+            heroSubtitle.textContent = 'Choose your conversion type below, then upload your files';
+        }
         
         this.fileInput.value = '';
         this.batchFileInput.value = '';
@@ -322,6 +347,7 @@ class PDFConverter {
         this.currentFileId = null;
         this.currentFileName = null;
         this.batchFiles = [];
+        this.selectedConversionType = null;
         
         this.progressArea.classList.remove('fade-in');
         this.optionsArea.classList.remove('fade-in');
@@ -358,21 +384,40 @@ function deleteHistoryItem(filename) {
     }
 }
 
-function showConversionMode(mode) {
+function selectConversionType(type) {
+    // Remove previous selection
+    document.querySelectorAll('.conversion-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Add selection to clicked option
+    event.target.closest('.conversion-option').classList.add('selected');
+    
+    // Store selection
+    window.converter.selectedConversionType = type;
+    
+    // Update hero subtitle
     const modeMessages = {
-        'pdf-to-word': 'PDF to Word conversion - Upload your PDF file to convert to Word format',
-        'pdf-password': 'Add Password Protection - Upload a PDF to add password security',
-        'pdf-merge': 'Merge PDFs - Upload multiple PDF files to combine them',
-        'any-to-pdf': 'Convert to PDF - Upload any supported file to convert to PDF'
+        'pdf-to-word': 'PDF to Word conversion - Upload your PDF files below',
+        'pdf-password': 'Add Password Protection - Upload PDF files to secure them',
+        'pdf-merge': 'Merge PDFs - Upload multiple PDF files to combine',
+        'any-to-pdf': 'Convert to PDF - Upload any supported file format below'
     };
     
-    if (modeMessages[mode]) {
-        const heroSubtitle = document.querySelector('.hero-subtitle');
-        if (heroSubtitle) {
-            heroSubtitle.textContent = modeMessages[mode];
-        }
-        alert(modeMessages[mode]);
+    const heroSubtitle = document.getElementById('heroSubtitle');
+    if (heroSubtitle && modeMessages[type]) {
+        heroSubtitle.textContent = modeMessages[type];
     }
+    
+    // Show upload area
+    setTimeout(() => {
+        window.converter.showUploadArea();
+        document.getElementById('uploadArea').scrollIntoView({ behavior: 'smooth' });
+    }, 300);
+}
+
+function showConversionMode(mode) {
+    selectConversionType(mode);
 }
 
 // Initialize when DOM is loaded

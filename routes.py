@@ -175,8 +175,23 @@ def convert_file():
 @app.route('/download/<file_id>')
 def download_file(file_id):
     try:
+        # Try with .pdf extension first
         pdf_filename = f"{file_id}.pdf"
         pdf_path = os.path.join(current_app.config['CONVERTED_FOLDER'], pdf_filename)
+        
+        # If not found, try without extension (in case file_id already includes .pdf)
+        if not os.path.exists(pdf_path):
+            pdf_path = os.path.join(current_app.config['CONVERTED_FOLDER'], file_id)
+            pdf_filename = file_id
+        
+        # If still not found, search for any file starting with file_id
+        if not os.path.exists(pdf_path):
+            converted_folder = current_app.config['CONVERTED_FOLDER']
+            for filename in os.listdir(converted_folder):
+                if filename.startswith(file_id):
+                    pdf_path = os.path.join(converted_folder, filename)
+                    pdf_filename = filename
+                    break
         
         if not os.path.exists(pdf_path):
             return jsonify({'error': 'File not found'}), 404

@@ -525,3 +525,55 @@ body {
     background: rgba(13, 110, 253, 0.05);
     transform: translateX(5px);
 }
+
+/* Conversion type selector */
+.conversion-option {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.conversion-option:hover {
+    border-color: var(--primary-color);
+    background: rgba(13, 110, 253, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(13, 110, 253, 0.2);
+}
+
+.conversion-option.selected {
+    border-color: var(--primary-color);
+    background: linear-gradient(45deg, rgba(13, 110, 253, 0.2), rgba(13, 202, 240, 0.2));
+    transform: scale(1.05);
+}
+
+.conversion-option i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.conversion-option h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.conversion-option p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* Hide upload area initially */
+#uploadArea.initial-hidden {
+    display: none !important;
+}
