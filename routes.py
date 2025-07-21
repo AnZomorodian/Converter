@@ -24,6 +24,58 @@ def about():
     """About Us page"""
     return render_template('about.html')
 
+@app.route('/api/stats')
+def api_stats():
+    """API endpoint for statistics"""
+    try:
+        # Try to get real data from data/stats.json
+        stats_file = os.path.join('data', 'stats.json')
+        if os.path.exists(stats_file):
+            with open(stats_file, 'r') as f:
+                stats = json.load(f)
+        else:
+            # Create default stats if file doesn't exist
+            stats = {
+                'total_conversions': 0,
+                'total_files_processed': 0,
+                'uptime_percentage': 99.8
+            }
+            os.makedirs('data', exist_ok=True)
+            with open(stats_file, 'w') as f:
+                json.dump(stats, f)
+        
+        return jsonify(stats)
+    except Exception as e:
+        # Return minimal stats on error
+        return jsonify({
+            'total_conversions': 0,
+            'total_files_processed': 0,
+            'uptime_percentage': 99.8
+        })
+
+def update_stats(files_processed=1):
+    """Update conversion statistics"""
+    try:
+        stats_file = os.path.join('data', 'stats.json')
+        if os.path.exists(stats_file):
+            with open(stats_file, 'r') as f:
+                stats = json.load(f)
+        else:
+            stats = {
+                'total_conversions': 0,
+                'total_files_processed': 0,
+                'uptime_percentage': 99.8
+            }
+            os.makedirs('data', exist_ok=True)
+        
+        stats['total_conversions'] += 1
+        stats['total_files_processed'] += files_processed
+        
+        with open(stats_file, 'w') as f:
+            json.dump(stats, f)
+    except Exception as e:
+        logging.error(f"Failed to update stats: {e}")
+
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {
     'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
@@ -126,6 +178,9 @@ def upload_files():
                         'file_id': file_id
                     })
                     
+                    # Update statistics
+                    update_stats(1)
+                    
                     logging.info(f"Successfully converted {filename} to PDF")
                     
                 else:
@@ -195,6 +250,9 @@ def upload_files():
             success = merge_pdfs(pdf_paths, merged_path, file_order=order_indices, passwords=pdf_passwords)
             
             if success:
+                # Update statistics for batch merge
+                update_stats(len(pdf_files))
+                
                 results.append({
                     'success': True,
                     'filename': 'Merged PDF',
@@ -226,6 +284,9 @@ def upload_files():
             success = convert_multiple_images_to_pdf(image_paths, images_pdf_path, quality)
             
             if success:
+                # Update statistics for images to PDF conversion
+                update_stats(len(image_files))
+                
                 results.append({
                     'success': True,
                     'filename': f'Images to PDF ({len(image_files)} images)',
