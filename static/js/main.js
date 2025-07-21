@@ -38,7 +38,12 @@ class FilyPro {
         this.fileInput?.addEventListener('change', (e) => this.handleFileSelect(e));
         
         if (this.uploadArea) {
-            this.uploadArea.addEventListener('click', () => this.fileInput.click());
+            this.uploadArea.addEventListener('click', (e) => {
+                // Only trigger file input if clicking directly on upload area, not on file input
+                if (e.target !== this.fileInput) {
+                    this.fileInput.click();
+                }
+            });
             this.uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
             this.uploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
             this.uploadArea.addEventListener('drop', (e) => this.handleFileDrop(e));

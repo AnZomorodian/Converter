@@ -2,6 +2,8 @@
   "total_conversions": 0,
   "successful_conversions": 0,
   "failed_conversions": 0,
-  "popular_formats": {},
-  "last_updated": "2025-07-21T11:49:31.497825"
+  "popular_formats": {
+    "docx": 1
+  },
+  "last_updated": "2025-07-21T11:50:33.471809"
 }

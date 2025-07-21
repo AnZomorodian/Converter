@@ -50,7 +50,7 @@ body {
 
 .brand-text {
     font-family: var(--font-primary);
-    font-size: 2rem;
+    font-size: 2.8rem;
     font-weight: 800;
     background: linear-gradient(45deg, #ffffff, #f8fafc);
     -webkit-background-clip: text;
@@ -60,7 +60,7 @@ body {
 
 .brand-subtitle {
     font-family: var(--font-primary);
-    font-size: 1.2rem;
+    font-size: 1.6rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.8);
     margin-left: -4px;
@@ -515,21 +515,130 @@ body {
     font-size: 0.8rem;
 }
 
-/* Footer */
+/* Enhanced Footer */
 .footer {
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
     backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3rem 0 1rem 0;
     margin-top: auto;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-.footer-content {
-    color: rgba(255, 255, 255, 0.8);
+.footer-section {
+    margin-bottom: 2rem;
 }
 
-.footer-content strong {
+.footer-title {
+    font-family: var(--font-primary);
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, #ffffff, #e2e8f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.footer-subtitle {
+    font-family: var(--font-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
     color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.footer-description {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.footer-formats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.format-chip {
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #a5b4fc;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.format-chip:hover {
+    background: rgba(99, 102, 241, 0.3);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.social-link:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(99, 102, 241, 0.3);
+}
+
+.footer-credits {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.footer-credits strong {
+    color: #ffffff;
+}
+
+.footer-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    margin: 2rem 0 1rem 0;
+}
+
+.footer-copyright {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
 }
 
 .text-danger {
@@ -579,10 +688,23 @@ body {
     }
     
     .brand-text {
-        font-size: 1.5rem;
+        font-size: 2rem;
     }
     
     .brand-subtitle {
-        font-size: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .footer-section {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+    
+    .footer-formats {
+        justify-content: center;
     }
 }
