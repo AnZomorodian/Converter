@@ -1,4 +1,4 @@
-from flask import jsonify, request, Response, render_template
+from flask import jsonify, request, Response, render_template, current_app
 from app import app, db
 from models import ConversionHistory, SystemStats, FileMetadata
 from utils import cleanup_old_files, format_file_size
@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 from sqlalchemy import func
 import json
 import logging
+import os
+import subprocess
 
 
 @app.route('/api/stats')

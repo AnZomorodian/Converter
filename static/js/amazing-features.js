@@ -3,7 +3,6 @@ class AmazingFeatures {
     constructor() {
         this.initializeFeatures();
         this.setupAnimations();
-        this.createParticleSystem();
         this.setupRealTimeStats();
         this.initializeThemes();
     }
