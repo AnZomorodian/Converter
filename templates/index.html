@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/enhanced-style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main-container.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/anti-copy.css') }}" rel="stylesheet">
 </head>
 <body>
@@ -24,15 +25,18 @@
             
             <div class="navbar-nav ms-auto">
                 <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-cog me-1"></i> Tools
+                    <a class="nav-link dropdown-toggle modern-nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-rocket me-1"></i> ابزارها
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/api/stats" target="_blank">
-                            <i class="fas fa-chart-bar me-2"></i>Statistics
+                            <i class="fas fa-chart-bar me-2"></i>آمار سیستم
                         </a></li>
                         <li><a class="dropdown-item" href="/api/system-health" target="_blank">
-                            <i class="fas fa-heartbeat me-2"></i>System Health
+                            <i class="fas fa-heartbeat me-2"></i>وضعیت سرور
+                        </a></li>
+                        <li><a class="dropdown-item" href="/api/supported-formats" target="_blank">
+                            <i class="fas fa-file-alt me-2"></i>فرمت‌های پشتیبانی شده
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="https://github.com/AnZomorodian" target="_blank">
@@ -47,9 +51,11 @@
         </div>
     </nav>
 
-    <div class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
+    <div class="main-container">
+        <div class="content-wrapper">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
                 <div class="text-center mb-5">
                     <div class="hero-section">
                         <div class="hero-icon">
@@ -75,13 +81,75 @@
                     </div>
                 </div>
 
-                <!-- Supported Formats Section -->
+                <!-- Enhanced Format Support Section -->
                 <div class="card mb-4" id="supportedFormatsSection">
+                    <div class="card-header text-center">
+                        <h5><i class="fas fa-file-alt me-2"></i>فرمت‌های پشتیبانی شده</h5>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title text-center mb-4">
-                            <i class="fas fa-file-alt me-2"></i>
-                            Supported File Formats
-                        </h5>
+                        <div class="format-grid">
+                            <div class="format-category">
+                                <h6><i class="fas fa-file-word"></i>اسناد متنی</h6>
+                                <div class="format-list">
+                                    <span class="format-tag">DOCX</span>
+                                    <span class="format-tag">DOC</span>
+                                    <span class="format-tag">RTF</span>
+                                    <span class="format-tag">TXT</span>
+                                    <span class="format-tag">ODT</span>
+                                    <span class="format-tag">MD</span>
+                                </div>
+                            </div>
+                            <div class="format-category">
+                                <h6><i class="fas fa-file-excel"></i>جداول</h6>
+                                <div class="format-list">
+                                    <span class="format-tag">XLSX</span>
+                                    <span class="format-tag">XLS</span>
+                                    <span class="format-tag">CSV</span>
+                                    <span class="format-tag">ODS</span>
+                                </div>
+                            </div>
+                            <div class="format-category">
+                                <h6><i class="fas fa-file-powerpoint"></i>ارائه</h6>
+                                <div class="format-list">
+                                    <span class="format-tag">PPTX</span>
+                                    <span class="format-tag">PPT</span>
+                                    <span class="format-tag">ODP</span>
+                                </div>
+                            </div>
+                            <div class="format-category">
+                                <h6><i class="fas fa-image"></i>تصاویر</h6>
+                                <div class="format-list">
+                                    <span class="format-tag">PNG</span>
+                                    <span class="format-tag">JPG</span>
+                                    <span class="format-tag">JPEG</span>
+                                    <span class="format-tag">GIF</span>
+                                    <span class="format-tag">BMP</span>
+                                    <span class="format-tag">TIFF</span>
+                                </div>
+                            </div>
+                            <div class="format-category">
+                                <h6><i class="fas fa-code"></i>وب و کد</h6>
+                                <div class="format-list">
+                                    <span class="format-tag">HTML</span>
+                                    <span class="format-tag">XML</span>
+                                    <span class="format-tag">JSON</span>
+                                    <span class="format-tag">CSS</span>
+                                    <span class="format-tag">JS</span>
+                                    <span class="format-tag">PY</span>
+                                </div>
+                            </div>
+                            <div class="format-category">
+                                <h6><i class="fas fa-plus-circle"></i>سایر</h6>
+                                <div class="format-list">
+                                    <span class="format-tag">PDF</span>
+                                    <span class="format-tag">EPUB</span>
+                                    <span class="format-tag">MOBI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                         <div class="supported-formats">
                             <span class="format-badge">DOC</span>
                             <span class="format-badge">DOCX</span>

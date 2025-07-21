@@ -34,6 +34,8 @@ body {
     color: var(--text-light);
     overflow-x: hidden;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes gradientShift {
@@ -61,30 +63,60 @@ body::before {
     100% { transform: translateX(-10px) translateY(-10px); }
 }
 
-/* Enhanced Navbar with Glassmorphism */
+/* Enhanced Navbar - Completely New Design */
 .navbar {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-light);
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-    margin: 10px 10px 0 10px;
-    padding: 15px 20px;
+    background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(30,30,30,0.9) 100%) !important;
+    backdrop-filter: blur(15px);
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border-radius: 0;
+    margin: 0;
+    padding: 20px 0;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.navbar:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-neon);
+.navbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.8s ease;
+}
+
+.navbar:hover::before {
+    left: 100%;
 }
 
 .navbar-brand {
     font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.8rem;
+    font-weight: 800;
+    font-size: 2.2rem;
     color: var(--text-light) !important;
     text-decoration: none;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.modern-nav-link {
+    font-weight: 600 !important;
+    color: var(--text-light) !important;
+    padding: 12px 20px !important;
+    border-radius: 25px !important;
+    transition: all 0.3s ease !important;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+}
+
+.modern-nav-link:hover {
+    background: rgba(255,255,255,0.2) !important;
+    transform: translateY(-2px) !important;
+    color: var(--text-light) !important;
 }
 
 .navbar-brand:hover {
@@ -497,16 +529,17 @@ body::before {
     100% { left: 100%; }
 }
 
-/* Enhanced Footer */
+/* Enhanced Footer - Sticky Bottom */
 .footer {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--glass-border);
+    background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(30,30,30,0.9) 100%) !important;
+    backdrop-filter: blur(15px);
+    border: none;
     color: var(--text-light) !important;
-    margin-top: 80px;
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-top: auto;
+    border-radius: 0;
+    margin-left: 0;
+    margin-right: 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
 }
 
 .footer-brand {

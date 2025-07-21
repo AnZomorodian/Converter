@@ -1,0 +1,182 @@
+/* Main Container Fixes - No Scroll Layout */
+.main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    max-height: calc(100vh - 140px); /* Account for header and footer */
+    overflow: hidden;
+}
+
+.content-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.3) transparent;
+}
+
+.content-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
+}
+
+/* Hero Section Compact */
+.hero-section {
+    padding: 30px 0 20px 0 !important;
+}
+
+.hero-title {
+    font-size: 2.8rem !important;
+    margin-bottom: 15px !important;
+}
+
+.hero-subtitle {
+    min-height: 40px !important;
+    margin-bottom: 20px !important;
+    font-size: 1.1rem !important;
+}
+
+.hero-features {
+    margin-top: 15px !important;
+    gap: 15px !important;
+}
+
+.feature-badge {
+    padding: 8px 16px !important;
+    font-size: 0.9rem !important;
+}
+
+/* Card Spacing Optimization */
+.card {
+    margin-bottom: 15px !important;
+}
+
+.card-body {
+    padding: 20px !important;
+}
+
+/* Upload Area Compact */
+.upload-area {
+    padding: 40px 30px !important;
+    margin-bottom: 15px !important;
+}
+
+.upload-icon {
+    font-size: 3rem !important;
+    margin-bottom: 15px !important;
+}
+
+.upload-text {
+    font-size: 1.1rem !important;
+    margin-bottom: 10px !important;
+}
+
+/* Format Support - Enhanced */
+.format-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.format-category {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.format-category:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    background: rgba(255,255,255,0.15);
+}
+
+.format-category h6 {
+    color: #00f2fe;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.format-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.format-tag {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.format-tag:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Responsive Fixes */
+@media (max-width: 768px) {
+    .main-container {
+        max-height: calc(100vh - 120px);
+    }
+    
+    .hero-title {
+        font-size: 2.2rem !important;
+    }
+    
+    .hero-features {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .format-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .content-wrapper {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-container {
+        max-height: calc(100vh - 100px);
+    }
+    
+    .hero-title {
+        font-size: 1.8rem !important;
+    }
+    
+    .upload-area {
+        padding: 30px 20px !important;
+    }
+    
+    .format-category {
+        padding: 15px;
+    }
+}
